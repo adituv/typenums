@@ -1,0 +1,22 @@
+name: typenums
+version: 0.1.0.0
+synopsis: Type level numbers using existing Nat functionality
+description: Type level numbers using existing Nat functionality
+category: Data
+github: adituv/typenums
+license: BSD3
+tested-with: GHC == 8.0.1, GHC == 8.0.2, GHC == 8.2.2
+author: AdituV
+maintainer: aditu.venyhandottir@gmail.com
+copyright: 2018 Iris Ward
+
+dependencies:
+  - base > 4.7 && < 5.0
+
+library:
+  source-dirs: src
+
+tests:
+  typenums-test:
+    source-dirs: test
+    main: Spec.hs
