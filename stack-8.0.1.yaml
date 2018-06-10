@@ -1,0 +1,7 @@
+resolver: lts-7.24
+
+
+
+ghc-options:
+  "$locals": -fhide-source-paths
+
