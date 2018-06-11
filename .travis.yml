@@ -22,6 +22,9 @@ matrix:
   - ghc: 8.2.2
     env: GHCVER='8.2.2' STACK_YAML="$HOME/build/adituv/typenums/stack.yaml"
 
+  - ghc: 8.4.3
+    env: GHCVER='8.4.3' STACK_YAML="$HOME/build/adituv/typenums/stack-$GHCVER.yaml"
+
 addons:
   apt:
     sources:
