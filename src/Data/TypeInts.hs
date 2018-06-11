@@ -1,10 +1,12 @@
-{-# LANGUAGE DataKinds        #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE PolyKinds        #-}
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE DataKinds           #-}
+{-# LANGUAGE FlexibleInstances   #-}
+{-# LANGUAGE MagicHash           #-}
+{-# LANGUAGE PolyKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE Trustworthy         #-}
+{-# LANGUAGE TypeApplications    #-}
+{-# LANGUAGE TypeFamilies        #-}
+{-# LANGUAGE TypeOperators       #-}
 
 {-|
 Module: Data.TypeInts
@@ -20,22 +22,22 @@ written as @'Neg' n@.
 -}
 module Data.TypeInts
   ( -- * Construction
-    Neg
-
+    NInt(Neg)
     -- * Linking type and value level
   , KnownInt
   , intVal
   , intVal'
   ) where
 
-import Data.Proxy(Proxy(..))
-import GHC.Exts(Proxy#)
-import GHC.TypeLits(Nat, KnownNat, natVal)
+import GHC.Exts     (Proxy#, proxy#)
+import GHC.TypeLits (KnownNat, Nat, natVal')
 
-newtype SInt (n :: k) = SInt Integer
+newtype SInt (n :: k) =
+  SInt Integer
 
--- | Type constructor for a negative integer
-data Neg (n :: Nat)
+-- | (Kind) A negative integer
+newtype NInt =
+  Neg Nat
 
 -- | This class gives the (value-level) integer associated with a type-level
 --   integer.  There are instances of this class for every concrete natural:
@@ -44,20 +46,28 @@ data Neg (n :: Nat)
 class KnownInt (n :: k) where
   intSing :: SInt n
 
-instance {-# OVERLAPPABLE #-} forall n. KnownNat n => KnownInt n where
-  intSing = SInt (natVal (Proxy @n))
+instance forall n. KnownNat n => KnownInt n where
+  intSing = SInt $! natVal' (proxy# @Nat @n)
 
-instance {-# OVERLAPPING #-} forall n. KnownNat n => KnownInt (Neg n) where
-  intSing = SInt (negate $ natVal (Proxy @n))
+instance forall n. KnownNat n => KnownInt ('Neg n) where
+  intSing = SInt $! negate (natVal' (proxy# @Nat @n))
 
 -- | Get the value associated with a type-level integer
-intVal :: forall n proxy. KnownInt n => proxy n -> Integer
-intVal _ = case intSing :: SInt n of
+intVal ::
+     forall n proxy. KnownInt n
+  => proxy n
+  -> Integer
+intVal _ =
+  case intSing :: SInt n of
     SInt x -> x
 
 -- | Get the value associated with a type-level integer.  The difference
 --   between this function and 'intVal' is that it takes a 'Proxy#' parameter,
 --   which has zero runtime representation and so is entirely free.
-intVal' :: forall n. KnownInt n => Proxy# n -> Integer
-intVal' _ = case intSing :: SInt n of
+intVal' ::
+     forall n. KnownInt n
+  => Proxy# n
+  -> Integer
+intVal' _ =
+  case intSing :: SInt n of
     SInt x -> x
