@@ -19,3 +19,12 @@ library:
   other-modules:
     - Data.TypeNums.Equality
   source-dirs: src
+
+tests:
+  typenums-tests:
+    source-dirs: test
+    main: Spec.hs
+    dependencies:
+      - typenums
+      - hspec
+    ghc-options: -Wno-all
