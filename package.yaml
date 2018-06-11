@@ -10,13 +10,12 @@ author: AdituV
 maintainer: aditu.venyhandottir@gmail.com
 copyright: 2018 Iris Ward
 
+ghc-options: -Wall
+
 dependencies:
   - base > 4.7 && < 5.0
 
 library:
+  other-modules:
+    - Data.TypeNums.Equality
   source-dirs: src
-
-tests:
-  typenums-test:
-    source-dirs: test
-    main: Spec.hs
