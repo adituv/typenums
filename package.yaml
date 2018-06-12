@@ -1,7 +1,11 @@
 name: typenums
 version: 0.1.0.0
 synopsis: Type level numbers using existing Nat functionality
-description: Type level numbers using existing Nat functionality
+description: >
+  Type level numbers using existing Nat functionality.
+  Uses kind-polymorphic typeclasses and type families to
+  facilitate more general code compatible with existing
+  code using type-level Naturals.
 category: Data
 github: adituv/typenums
 license: BSD3
