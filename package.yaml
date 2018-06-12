@@ -17,6 +17,8 @@ dependencies:
 
 library:
   other-modules:
+    - Data.TypeNums.Arithmetic
+    - Data.TypeNums.Comparison
     - Data.TypeNums.Equality
   source-dirs: src
 

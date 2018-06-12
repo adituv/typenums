@@ -28,10 +28,12 @@ this packages favour.
 module Data.TypeNums
   ( -- * Type level numbers
     -- ** Naturals
-    Nat
-  , KnownNat
-  , natVal
-  , natVal'
+    G.Nat
+  , G.KnownNat
+  , G.natVal
+  , G.natVal'
+  , G.SomeNat(..)
+  , G.someNatVal
     -- ** Integers
   , TInt(..)
   , KnownInt
@@ -61,4 +63,5 @@ import Data.TypeNums.Comparison
 import Data.TypeNums.Equality
 import Data.TypeNums.Ints
 import Data.TypeNums.Rats
-import GHC.TypeLits             (KnownNat, Nat, natVal, natVal')
+
+import qualified GHC.TypeLits as G
