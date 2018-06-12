@@ -14,6 +14,16 @@ compatible with existing code using type-level naturals.
 
 Natural numbers are expressed as always, e.g. @5@.  Negative integers
 are written as @Neg 3@.  Ratios are written as @3 :% 2@.
+
+There are some naming conflicts between this module and "GHC.TypeLits",
+notably the comparison and arithmetic operators.  This module reexports
+'Nat', 'KnownNat', 'natVal' and 'natVal'' so you may import just this
+module and not "GHC.TypeLits".
+
+If you wish to use other functionality from "GHC.TypeLits", this package
+also provides the module "Data.TypeLits" that includes (almost) full
+functionality from "GHC.TypeLits", but with the conflicts resolving in
+this packages favour.
 -}
 module Data.TypeNums
   ( -- * Type level numbers
@@ -23,7 +33,7 @@ module Data.TypeNums
   , natVal
   , natVal'
     -- ** Integers
-  , NInt(Neg)
+  , TInt(..)
   , KnownInt
   , intVal
   , intVal'
@@ -41,11 +51,14 @@ module Data.TypeNums
   , type (>=)
   , type (>)
     -- ** Arithmetic
+  , type (+)
+  , type (-)
   , type (*)
   ) where
 
-import Data.TypeInts
+import Data.TypeNums.Arithmetic
+import Data.TypeNums.Comparison
 import Data.TypeNums.Equality
-import Data.TypeNums.Internal
-import Data.TypeRats
-import GHC.TypeLits           (KnownNat, Nat, natVal, natVal')
+import Data.TypeNums.Ints
+import Data.TypeNums.Rats
+import GHC.TypeLits             (KnownNat, Nat, natVal, natVal')

@@ -12,7 +12,7 @@
 {-# LANGUAGE TypeOperators             #-}
 
 {-|
-Module: Data.TypeRats
+Module: Data.TypeNums.Rats
 Copyright: (c) 2018 Iris Ward
 License: BSD3
 Maintainer: aditu.venyhandottir@gmail.com
@@ -23,15 +23,15 @@ and a type-level natural.  For example @'Neg' 3 :% 2@.
 
 See also: "Data.TypeInts"
 -}
-module Data.TypeRats
+module Data.TypeNums.Rats
   ( Rat((:%))
   , KnownRat
   , ratVal
   , ratVal'
   ) where
 
-import Data.TypeInts
 import Data.TypeNums.Equality (type (/=))
+import Data.TypeNums.Ints
 
 import Data.Ratio   (Rational, (%))
 import GHC.Exts     (Proxy#, proxy#)

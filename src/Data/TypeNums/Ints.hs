@@ -9,7 +9,7 @@
 {-# LANGUAGE TypeOperators       #-}
 
 {-|
-Module: Data.TypeInts
+Module: Data.TypeNums.Ints
 Copyright: (c) 2018 Iris Ward
 License: BSD3
 Maintainer: aditu.venyhandottir@gmail.com
@@ -20,9 +20,9 @@ from "GHC.TypeLits", for example @3@.  However, a minus sign is not
 recognised in this context, so a negative type-level integer is instead
 written as @'Neg' n@.
 -}
-module Data.TypeInts
+module Data.TypeNums.Ints
   ( -- * Construction
-    NInt(Neg)
+    TInt(..)
     -- * Linking type and value level
   , KnownInt
   , intVal
@@ -35,9 +35,9 @@ import GHC.TypeLits (KnownNat, Nat, natVal')
 newtype SInt (n :: k) =
   SInt Integer
 
--- | (Kind) A negative integer
-newtype NInt =
-  Neg Nat
+-- | (Kind) An integer that may be negative.
+data TInt = Pos Nat
+          | Neg Nat
 
 -- | This class gives the (value-level) integer associated with a type-level
 --   integer.  There are instances of this class for every concrete natural:
@@ -47,6 +47,9 @@ class KnownInt (n :: k) where
   intSing :: SInt n
 
 instance forall n. KnownNat n => KnownInt n where
+  intSing = SInt $! natVal' (proxy# @Nat @n)
+
+instance forall n. KnownNat n => KnownInt ('Pos n) where
   intSing = SInt $! natVal' (proxy# @Nat @n)
 
 instance forall n. KnownNat n => KnownInt ('Neg n) where
