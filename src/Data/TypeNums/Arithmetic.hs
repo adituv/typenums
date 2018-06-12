@@ -33,6 +33,9 @@ type family ArithK k1 k2 where
   ArithK TInt a    = TInt
   ArithK a    TInt = TInt
 
+infixl 6 +, -
+infixl 7 *
+
 -- | The sum of two type-level numbers
 type family (x :: k1) + (y :: k2) :: ArithK k1 k2 where
   (x :: Nat)  + (y :: Nat)  = (G.+) x y

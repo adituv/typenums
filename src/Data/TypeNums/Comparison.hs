@@ -14,6 +14,8 @@ import GHC.TypeLits             (Nat)
 
 import qualified GHC.TypeLits as G
 
+infix 4 <=?, <=, <, >=, >
+
 -- | Boolean comparison of two type-level numbers
 type family (a :: k1) <=? (b :: k2) :: Bool where
   (a :: Nat)  <=? (b :: Nat)  = (G.<=?) a b

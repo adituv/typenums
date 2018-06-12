@@ -10,6 +10,8 @@ module Data.TypeNums.Equality where
 import           Data.Type.Bool     (Not)
 import qualified Data.Type.Equality as DTE
 
+infix 4 ==?, /=?, ==, /=
+
 -- | Boolean type-level equals.  Useful for e.g.
 --   @'Data.Type.Bool.If' (x ==? 0)@
 type (a :: k) ==? (b :: k) = (DTE.==) a b
