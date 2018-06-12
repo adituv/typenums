@@ -1,5 +1,6 @@
+{-# LANGUAGE CPP                #-}
 {-# LANGUAGE ExplicitNamespaces #-}
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE Safe               #-}
 
 {-|
 Module: Data.TypeLits
@@ -59,7 +60,9 @@ module Data.TypeLits
 
     -- * Symbols
   , G.Symbol
+#if MIN_VERSION_base(4,10,0)
   , G.AppendSymbol
+#endif
   , G.CmpSymbol
   , G.KnownSymbol
   , G.symbolVal
