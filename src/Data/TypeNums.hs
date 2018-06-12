@@ -46,8 +46,11 @@ module Data.TypeNums
   , ratVal'
     -- * Type level numerical operations
     -- ** Comparisons
+  , type (==?)
+  , type (/=?)
   , type (==)
   , type (/=)
+  , type (<=?)
   , type (<=)
   , type (<)
   , type (>=)

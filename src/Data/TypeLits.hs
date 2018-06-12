@@ -41,6 +41,10 @@ module Data.TypeLits
   , ratVal
   , ratVal'
     -- * Type level numerical operations
+    -- ** Comparison
+  , type (==?)
+  , type (/=?)
+  , type (<=?)
   , type (==)
   , type (/=)
   , type (<=)
