@@ -35,5 +35,5 @@ tests:
     main: Spec.hs
     dependencies:
       - typenums
-      - hspec
+      - hspec >= 2.0
     ghc-options: -Wno-all
