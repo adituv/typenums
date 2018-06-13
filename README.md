@@ -14,6 +14,19 @@ Import either Data.TypeNums or Data.TypeLits instead of GHC.TypeLits.  Some
 definitions conflict with GHC.TypeLits, so if you really must import it, use
 an explicit import list.
 
+This library is intended to be used in a kind-polymorphic way, such that
+a type-level integer parameter can be written as a natural, and a rational
+can be written as either of the other two.  As an example:
+
+```haskell
+{-# LANGUAGE PolyKinds #-}
+
+data SomeType (n :: k) = SomeType
+
+useSomeType :: KnownInt n => SomeType n -> _
+useSomeType = -- ...
+```
+
 ## Syntax
 * Positive integers are written as natural numbers, as before.  Optionally
   they can also be written as `Pos n`.
