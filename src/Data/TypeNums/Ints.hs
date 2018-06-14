@@ -1,12 +1,13 @@
-{-# LANGUAGE DataKinds           #-}
-{-# LANGUAGE FlexibleInstances   #-}
-{-# LANGUAGE MagicHash           #-}
-{-# LANGUAGE PolyKinds           #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE Trustworthy         #-}
-{-# LANGUAGE TypeApplications    #-}
-{-# LANGUAGE TypeFamilies        #-}
-{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE DataKinds                 #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleInstances         #-}
+{-# LANGUAGE MagicHash                 #-}
+{-# LANGUAGE PolyKinds                 #-}
+{-# LANGUAGE ScopedTypeVariables       #-}
+{-# LANGUAGE Trustworthy               #-}
+{-# LANGUAGE TypeApplications          #-}
+{-# LANGUAGE TypeFamilies              #-}
+{-# LANGUAGE TypeOperators             #-}
 
 {-|
 Module: Data.TypeNums.Ints
@@ -27,17 +28,23 @@ module Data.TypeNums.Ints
   , KnownInt
   , intVal
   , intVal'
+  , SomeInt(..)
+  , someIntVal
   ) where
 
-import GHC.Exts     (Proxy#, proxy#)
-import GHC.TypeLits (KnownNat, Nat, natVal')
+import Data.Bifunctor (first)
+import Data.Proxy     (Proxy (..))
+import GHC.Exts       (Proxy#, proxy#)
+import GHC.TypeLits   (KnownNat, Nat, natVal')
+import Unsafe.Coerce  (unsafeCoerce)
 
 newtype SInt (n :: k) =
   SInt Integer
 
 -- | (Kind) An integer that may be negative.
-data TInt = Pos Nat
-          | Neg Nat
+data TInt
+  = Pos Nat
+  | Neg Nat
 
 -- | This class gives the (value-level) integer associated with a type-level
 --   integer.  There are instances of this class for every concrete natural:
@@ -74,3 +81,45 @@ intVal' ::
 intVal' _ =
   case intSing :: SInt n of
     SInt x -> x
+
+-- | This type represents unknown type-level integers.
+--
+-- @since 0.1.1
+data SomeInt =
+  forall n. KnownInt n =>
+            SomeInt (Proxy n)
+
+instance Eq SomeInt where
+  SomeInt x == SomeInt y = intVal x == intVal y
+
+instance Ord SomeInt where
+  compare (SomeInt x) (SomeInt y) = compare (intVal x) (intVal y)
+
+instance Show SomeInt where
+  showsPrec p (SomeInt x) = showsPrec p (intVal x)
+
+instance Read SomeInt where
+  readsPrec p xs = first someIntVal <$> readsPrec p xs
+
+-- $impl
+-- Implementation notes:
+--   * A typeclass on a data constructor is represented internally as an extra
+--     field on the data constructor containing the typeclass dictionary. This
+--     field occurs before the other fields.
+--   * A dictionary for the KnownInt typeclass is represented as just an SInt
+--     value on its own, as there is only one member of the typeclass, and that
+--     member is not a function.
+--
+-- someIntVal therefore constructs a datatype with the same representation as
+-- the existentially qualified constructor SomeInt, then uses unsafeCoerce to
+-- produce the SomeInt value.
+
+data SomeIntWithDict =
+  forall n. SomeIntWithDict (SInt n)
+                            (Proxy n)
+
+-- | Convert an integer into an unknown type-level integer.
+--
+-- @since 0.1.1
+someIntVal :: Integer -> SomeInt
+someIntVal x = unsafeCoerce $ SomeIntWithDict (SInt x) Proxy

@@ -6,6 +6,7 @@ module Data.TypeNums.IntsSpec where
 
 import Data.TypeNums
 import Test.Hspec
+import Test.QuickCheck(property)
 
 import Data.Proxy
 import Data.Ratio
@@ -35,3 +36,7 @@ spec = do
       intVal' (proxy# :: Proxy# ('Neg 10)) `shouldBe` (-10)
     it "correctly gets the value of a positive integer" $
       intVal' (proxy# :: Proxy# ('Pos 52)) `shouldBe` 52
+  describe "someIntVal" $
+    it "fetches the correct value using intVal" $ property $
+      \x -> case someIntVal x of
+        SomeInt y -> intVal y `shouldBe` x

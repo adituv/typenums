@@ -36,11 +36,15 @@ module Data.TypeLits
   , KnownInt
   , intVal
   , intVal'
+  , SomeInt(..)
+  , someIntVal
     -- ** Rationals
   , Rat((:%))
   , KnownRat
   , ratVal
   , ratVal'
+  , SomeRat(..)
+  , someRatVal
     -- * Type level numerical operations
     -- ** Comparison
   , type (==?)

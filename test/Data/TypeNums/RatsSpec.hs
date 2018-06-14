@@ -6,6 +6,7 @@ module Data.TypeNums.RatsSpec where
 
 import Data.TypeNums
 import Test.Hspec
+import Test.QuickCheck(property)
 
 import Data.Proxy
 import Data.Ratio
@@ -43,4 +44,7 @@ spec = do
       ratVal' (proxy# :: Proxy# ('Neg 11 ':% 8)) `shouldBe` (-11) % 8
     it "correctly gets the value of a positive rational" $
       ratVal' (proxy# :: Proxy# ('Pos 16 ':% 25)) `shouldBe` 16 % 25
-
+  describe "someRatVal" $
+    it "fetches the correct value using ratVal" $ property $
+      \x -> case someRatVal x of
+        SomeRat y -> ratVal y `shouldBe` x

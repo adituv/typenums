@@ -24,21 +24,29 @@ and a type-level natural.  For example @'Neg' 3 :% 2@.
 See also: "Data.TypeInts"
 -}
 module Data.TypeNums.Rats
-  ( Rat((:%))
+  ( -- * Construction
+    Rat((:%))
+    -- * Linking type and value level
   , KnownRat
   , ratVal
   , ratVal'
+  , SomeRat(..)
+  , someRatVal
   ) where
 
 import Data.TypeNums.Equality (type (/=))
 import Data.TypeNums.Ints
 
-import Data.Ratio   (Rational, (%))
-import GHC.Exts     (Proxy#, proxy#)
-import GHC.TypeLits (ErrorMessage (..), KnownNat, Nat, TypeError, natVal')
+import Data.Bifunctor (first)
+import Data.Proxy     (Proxy (..))
+import Data.Ratio     (Rational, (%))
+import GHC.Exts       (Proxy#, proxy#)
+import GHC.TypeLits   (ErrorMessage (..), KnownNat, Nat, TypeError, natVal')
+import Unsafe.Coerce  (unsafeCoerce)
 
 -- | Type constructor for a rational
-data Rat = forall k. k :% Nat
+data Rat =
+  forall k. k :% Nat
 
 newtype SRat r =
   SRat Rational
@@ -79,3 +87,34 @@ ratVal' ::
 ratVal' _ =
   case ratSing :: SRat r of
     SRat x -> x
+
+-- | This type represents unknown type-level integers.
+--
+-- @since 0.1.1
+data SomeRat =
+  forall r. KnownRat r =>
+            SomeRat (Proxy r)
+
+instance Eq SomeRat where
+  SomeRat x == SomeRat y = ratVal x == ratVal y
+
+instance Ord SomeRat where
+  compare (SomeRat x) (SomeRat y) = compare (ratVal x) (ratVal y)
+
+instance Show SomeRat where
+  showsPrec p (SomeRat x) = showsPrec p (ratVal x)
+
+instance Read SomeRat where
+  readsPrec p xs = first someRatVal <$> readsPrec p xs
+
+-- For implementation notes, see $impl in "Data.TypeNats.Ints"
+
+data SomeRatWithDict =
+  forall r. SomeRatWithDict (SRat r)
+                            (Proxy r)
+
+-- | Convert a rational into an unknown type-level rational.
+--
+-- @since 0.1.1
+someRatVal :: Rational -> SomeRat
+someRatVal r = unsafeCoerce $ SomeRatWithDict (SRat r) Proxy
