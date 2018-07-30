@@ -12,6 +12,7 @@ module Data.TypeNums.Arithmetic
   ( type (+)
   , type (-)
   , type (*)
+  , type ArithK
   ) where
 
 import Data.Type.Bool     (If)

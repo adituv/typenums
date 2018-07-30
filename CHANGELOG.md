@@ -4,6 +4,10 @@ Change log
 typenums uses [PVP Versioning][1].
 The change log is available [on GitHub][2].
 
+0.1.2
+=====
+* Exposed ArithK kind-family
+
 0.1.1.1
 =======
 * Add UndecidableInstances language extension to Data.TypeNums.Rats.  This

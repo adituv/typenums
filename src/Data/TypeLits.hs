@@ -61,6 +61,7 @@ module Data.TypeLits
   , type (-)
   , type (*)
   , type (G.^)
+  , type ArithK
 
     -- * Symbols
   , G.Symbol
