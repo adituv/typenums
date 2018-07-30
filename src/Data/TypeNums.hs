@@ -63,6 +63,7 @@ module Data.TypeNums
   , type (+)
   , type (-)
   , type (*)
+  , type ArithK
   ) where
 
 import Data.TypeNums.Arithmetic
