@@ -4,6 +4,12 @@ Change log
 typenums uses [PVP Versioning][1].
 The change log is available [on GitHub][2].
 
+0.1.2
+=====
+* ([#2](https://github.com/adituv/typenums/issues/2))
+  Refactored type-level arithmetic so that the type families are exposed from
+  an Internal module and are extensible.
+
 0.1.1.1
 =======
 * Add UndecidableInstances language extension to Data.TypeNums.Rats.  This
