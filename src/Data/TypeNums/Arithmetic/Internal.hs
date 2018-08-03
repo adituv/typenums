@@ -10,13 +10,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | This module exposes the inner workings of type-level arithmetic for
---   further extensions.  The type families found within this module should
---   not be used directly other than to add new  s; instead use
---   the operators from "Data.TypeNums.Arithmetic".
---
---   Due to technical limitations, the type families are open for extension
---   only in GHC 8.2 and onwards.
--- @since 0.1.2
+--   further extensions.
 module Data.TypeNums.Arithmetic.Internal where
 
 import Data.Type.Bool     (If)
@@ -28,9 +22,9 @@ import GHC.TypeLits
 -- user should only see them via ratVal which already handles reduction
 -- at value level.
 
--- | The kind of the result of addition.  If you add new cases to this
---   type family, be aware that it could cause conflicts with other code
---   that does the same.  Modify with caution.
+-- | The kind of the result of addition.
+--
+-- @since 0.1.2
 type family AddK k1 k2 where
   AddK Nat  Nat  = Nat
   AddK Nat  Rat  = Rat
@@ -42,9 +36,9 @@ type family AddK k1 k2 where
   AddK TInt Rat  = Rat
   AddK TInt TInt = TInt
 
--- | The kind of the result of subtraction.  If you add new cases to this
---   type family, be aware that it could cause conflicts with other code
---   that does the same.  Modify with caution.
+-- | The kind of the result of subtraction.
+--
+-- @since 0.1.2
 type family SubK k1 k2 where
   SubK Nat  Nat  = Nat
   SubK Nat  Rat  = Rat
@@ -56,9 +50,9 @@ type family SubK k1 k2 where
   SubK TInt Rat  = Rat
   SubK TInt TInt = TInt
 
--- | The kind of the result of multiplication.  If you add new cases to this
---   type family, be aware that it could cause conflicts with other code
---   that does the same.  Modify with caution.
+-- | The kind of the result of multiplication.
+--
+-- @since 0.1.2
 type family MulK k1 k2 where
   MulK Nat  Nat  = Nat
   MulK Nat  Rat  = Rat
@@ -72,6 +66,8 @@ type family MulK k1 k2 where
 
 
 -- | The sum of two type-level numbers.
+--
+-- @since 0.1.2
 type family Add (x :: k1) (y :: k2) :: AddK k1 k2 where
   Add (x :: Nat) (y :: Nat)  = x + y
 
@@ -103,6 +99,8 @@ type family Add (x :: k1) (y :: k2) :: AddK k1 k2 where
   Add ('Neg x)    (n ':% d)   = (Add (Mul d ('Neg x)) n) ':% d
 
 -- | The difference of two type-level numbers
+--
+-- @since 0.1.2
 type family Sub (x :: k1) (y :: k2) :: SubK k1 k2 where
   Sub (x :: Nat) (y :: Nat)  = x - y
 
@@ -129,6 +127,8 @@ type family Sub (x :: k1) (y :: k2) :: SubK k1 k2 where
   Sub ('Neg x)    (n ':% d)   = Sub ('Neg x ':% 1) (n ':% d)
 
 -- | The product of two type-level numbers
+--
+-- @since 0.1.2
 type family Mul (x :: k1) (y :: k2) :: MulK k1 k2 where
   Mul (x :: Nat) (y :: Nat) = x * y
 
