@@ -2,6 +2,7 @@
 {-# LANGUAGE CPP                  #-}
 {-# LANGUAGE DataKinds            #-}
 {-# LANGUAGE ExplicitNamespaces   #-}
+{-# LANGUAGE NoStarIsType         #-}
 {-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE Safe                 #-}
 {-# LANGUAGE TypeFamilies         #-}

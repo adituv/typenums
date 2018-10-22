@@ -1,4 +1,5 @@
 {-# LANGUAGE ExplicitNamespaces #-}
+{-# LANGUAGE NoStarIsType       #-}
 {-# LANGUAGE Safe               #-}
 
 {-|

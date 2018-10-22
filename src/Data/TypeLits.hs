@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE ExplicitNamespaces #-}
+{-# LANGUAGE NoStarIsType       #-}
 {-# LANGUAGE Safe               #-}
 
 {-|

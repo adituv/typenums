@@ -1,6 +1,7 @@
 {-# LANGUAGE ConstraintKinds      #-}
 {-# LANGUAGE DataKinds            #-}
 {-# LANGUAGE PolyKinds            #-}
+{-# LANGUAGE NoStarIsType         #-}
 {-# LANGUAGE Safe                 #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeOperators        #-}

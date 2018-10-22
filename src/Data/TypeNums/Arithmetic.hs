@@ -1,4 +1,5 @@
 {-# LANGUAGE ExplicitNamespaces #-}
+{-# LANGUAGE NoStarIsType       #-}
 {-# LANGUAGE PolyKinds          #-}
 {-# LANGUAGE Safe               #-}
 {-# LANGUAGE TypeOperators      #-}
