@@ -1,11 +1,16 @@
 {-# LANGUAGE ConstraintKinds      #-}
+{-# LANGUAGE CPP                  #-}
 {-# LANGUAGE DataKinds            #-}
 {-# LANGUAGE PolyKinds            #-}
-{-# LANGUAGE NoStarIsType         #-}
 {-# LANGUAGE Safe                 #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
+
+#if MIN_VERSION_base(4,12,0)
+{-# LANGUAGE NoStarIsType #-}
+#endif
+
 module Data.TypeNums.Comparison where
 
 import Data.TypeNums.Arithmetic

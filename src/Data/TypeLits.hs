@@ -1,7 +1,10 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE ExplicitNamespaces #-}
-{-# LANGUAGE NoStarIsType       #-}
 {-# LANGUAGE Safe               #-}
+
+#if MIN_VERSION_base(4,12,0)
+{-# LANGUAGE NoStarIsType #-}
+#endif
 
 {-|
 Module: Data.TypeLits

@@ -1,8 +1,12 @@
+{-# LANGUAGE CPP                #-}
 {-# LANGUAGE ExplicitNamespaces #-}
-{-# LANGUAGE NoStarIsType       #-}
 {-# LANGUAGE PolyKinds          #-}
 {-# LANGUAGE Safe               #-}
 {-# LANGUAGE TypeOperators      #-}
+
+#if MIN_VERSION_base(4,12,0)
+{-# LANGUAGE NoStarIsType #-}
+#endif
 
 -- | This module provides operators for type-level arithmetic.  To
 --   extend this functionality, add new type instances to the underlying
@@ -24,5 +28,10 @@ type (+) a b = Add a b
 -- | The difference of two type-level numbers
 type (-) a b = Sub a b
 
--- | The product of two type-level numbers
+-- | The product of two type-level numbers.
+--
+--   Due to changes in GHC 8.6, using this operator infix and unqualified
+--   requires the NoStarIsType language extension to be active.  See the GHC
+--   8.6.x migration guide for details:
+--   <https://ghc.haskell.org/trac/ghc/wiki/Migration/8.6>
 type (*) a b = Mul a b

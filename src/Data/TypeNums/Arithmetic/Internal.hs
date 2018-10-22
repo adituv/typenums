@@ -2,13 +2,16 @@
 {-# LANGUAGE CPP                  #-}
 {-# LANGUAGE DataKinds            #-}
 {-# LANGUAGE ExplicitNamespaces   #-}
-{-# LANGUAGE NoStarIsType         #-}
 {-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE Safe                 #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeInType           #-}
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
+
+#if MIN_VERSION_base(4,12,0)
+{-# LANGUAGE NoStarIsType #-}
+#endif
 
 -- | This module exposes the inner workings of type-level arithmetic for
 --   further extensions.

@@ -1,5 +1,5 @@
 name: typenums
-version: 0.1.2
+version: 0.1.2.1
 synopsis: Type level numbers using existing Nat functionality
 description: >
   Type level numbers using existing Nat functionality.
