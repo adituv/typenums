@@ -4,6 +4,11 @@ Change log
 typenums uses [PVP Versioning][1].
 The change log is available [on GitHub][2].
 
+0.1.2.1
+=======
+* Fix build failure on GHC 8.6 by adding conditional NoStarIsType langauge
+pragma
+
 0.1.2
 =====
 * ([#2](https://github.com/adituv/typenums/issues/2))
