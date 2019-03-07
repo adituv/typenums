@@ -25,6 +25,11 @@ infix 4 <=?, <=, <, >=, >
 -- | Boolean comparison of two type-level numbers
 type family (a :: k1) <=? (b :: k2) :: Bool where
   (a :: Nat)  <=? (b :: Nat)  = (G.<=?) a b
+  'Pos a      <=? 'Pos b      = (G.<=?) a b
+  'Neg _      <=? 'Pos _      = 'True
+  'Pos _      <=? 'Neg _      = 'False
+  'Pos a      <=? b           = a <=? b -- unwrap Nat from Pos
+  a           <=? 'Pos b      = a <=? b -- unwrap Nat from Pos
   0           <=? 'Neg 0      = 'True
   'Neg a      <=? (b :: Nat)  = 'True
   'Neg a      <=? 'Neg b      = (G.<=?) b a
