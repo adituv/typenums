@@ -1,6 +1,3 @@
-# Using hpack so ignore .cabal
-*.cabal
-
 ### Haskell
 dist
 dist-*
