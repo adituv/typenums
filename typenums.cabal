@@ -37,6 +37,10 @@ library
   hs-source-dirs:
       src
   ghc-options: -Wall
+
+  if impl(ghc >= 9.0)
+    ghc-options: -Wall -Winferred-safe-imports -Wmissing-safe-haskell-mode
+
   build-depends:
       base >4.9 && <5.0
   default-language: Haskell2010
@@ -46,6 +50,7 @@ test-suite typenums-tests
   main-is: Spec.hs
   other-modules:
       Data.TypeNums.ArithmeticSpec
+      Data.TypeNums.ComparisonSpec
       Data.TypeNums.IntsSpec
       Data.TypeNums.RatsSpec
       Paths_typenums

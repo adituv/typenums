@@ -27,13 +27,17 @@ type family (a :: k1) <=? (b :: k2) :: Bool where
   (a :: Nat)  <=? (b :: Nat)  = (G.<=?) a b
   'Pos a      <=? 'Pos b      = (G.<=?) a b
   'Neg _      <=? 'Pos _      = 'True
+  'Pos 0      <=? 'Neg 0      = 'True
   'Pos _      <=? 'Neg _      = 'False
   'Pos a      <=? b           = a <=? b -- unwrap Nat from Pos
   a           <=? 'Pos b      = a <=? b -- unwrap Nat from Pos
   0           <=? 'Neg 0      = 'True
+  (a :: Nat)  <=? 'Neg _      = 'False
   'Neg a      <=? (b :: Nat)  = 'True
   'Neg a      <=? 'Neg b      = (G.<=?) b a
-  (n1 ':% d1) <=? (n2 ':% d2) = (n1 * d1) <=? (n2 * d2)
+  (n ':% 0)   <=? _           = G.TypeError ('G.Text "Denominator must not equal 0")
+  _           <=? (n ':% 0)   = G.TypeError ('G.Text "Denominator must not equal 0")
+  (n1 ':% d1) <=? (n2 ':% d2) = (n1 * d2) <=? (n2 * d1)
   a           <=? (n ':% d)   = (a * d) <=? n
   (n ':% d)   <=? b           = n <=? (b * d)
 
