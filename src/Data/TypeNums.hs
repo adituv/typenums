@@ -7,7 +7,7 @@
 #endif
 {-|
 Module: Data.TypeNums
-Copyright: (c) 2018 Iris Ward
+Copyright: (c) 2018-2021 Iris Ward
 License: BSD3
 Maintainer: aditu.venyhandottir@gmail.com
 Stability: experimental
