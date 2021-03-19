@@ -53,14 +53,14 @@ data TInt
 class KnownInt (n :: k) where
   intSing :: SInt n
 
-instance forall n. KnownNat n => KnownInt n where
-  intSing = SInt $! natVal' (proxy# @Nat @n)
+instance forall (n :: Nat). KnownNat n => KnownInt n where
+  intSing = SInt $! natVal' (proxy# @n)
 
-instance forall n. KnownNat n => KnownInt ('Pos n) where
-  intSing = SInt $! natVal' (proxy# @Nat @n)
+instance forall (n :: Nat). KnownNat n => KnownInt ('Pos n) where
+  intSing = SInt $! natVal' (proxy# @n)
 
-instance forall n. KnownNat n => KnownInt ('Neg n) where
-  intSing = SInt $! negate (natVal' (proxy# @Nat @n))
+instance forall (n :: Nat). KnownNat n => KnownInt ('Neg n) where
+  intSing = SInt $! negate (natVal' (proxy# @n))
 
 -- | Get the value associated with a type-level integer
 intVal ::

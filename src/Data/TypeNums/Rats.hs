@@ -40,7 +40,7 @@ import Data.TypeNums.Ints
 
 import Data.Bifunctor (first)
 import Data.Proxy     (Proxy (..))
-import Data.Ratio     (Rational, (%))
+import Data.Ratio     ((%))
 import GHC.Exts       (Proxy#, proxy#)
 import GHC.TypeLits   (ErrorMessage (..), KnownNat, Nat, TypeError, natVal')
 import Unsafe.Coerce  (unsafeCoerce)
@@ -62,12 +62,12 @@ instance {-# OVERLAPPING #-} (TypeError ('Text "Denominator must not equal 0")) 
                              KnownRat (n ':% 0) where
   ratSing = error "Unreachable"
 
-instance {-# OVERLAPS #-} forall (n :: k) d. (KnownInt n, KnownNat d, d /= 0) =>
+instance {-# OVERLAPS #-} forall k (n :: k) (d :: Nat). (KnownInt n, KnownNat d, d /= 0) =>
                           KnownRat (n ':% d) where
-  ratSing = SRat $! intVal' (proxy# @k @n) % natVal' (proxy# @Nat @d)
+  ratSing = SRat $! intVal' (proxy# @n) % natVal' (proxy# @d)
 
-instance {-# OVERLAPPABLE #-} forall (n :: k). (KnownInt n) => KnownRat n where
-  ratSing = SRat $! intVal' (proxy# @k @n) % 1
+instance {-# OVERLAPPABLE #-} forall k (n :: k). (KnownInt n) => KnownRat n where
+  ratSing = SRat $! intVal' (proxy# @n) % 1
 
 -- | Get the value associated with a type-level rational
 ratVal ::
