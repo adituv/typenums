@@ -15,6 +15,18 @@ module Data.TypeNums.Arithmetic
   ( type (+)
   , type (-)
   , type (*)
+  , type (/)
+  , DivMod
+  , QuotRem
+  , Div
+  , Mod
+  , Quot
+  , Rem
+  , Abs
+  , Negate
+  , Recip
+  , GCD
+  , Simplify
   ) where
 
 import Data.TypeNums.Arithmetic.Internal
@@ -35,3 +47,6 @@ type (-) a b = Sub a b
 --   8.6.x migration guide for details:
 --   <https://ghc.haskell.org/trac/ghc/wiki/Migration/8.6>
 type (*) a b = Mul a b
+
+-- | The ratio of two type-level numbers
+type (/) a b = RatDiv a b

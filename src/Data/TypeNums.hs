@@ -67,6 +67,18 @@ module Data.TypeNums
   , type (+)
   , type (-)
   , type (*)
+  , type (/)
+  , DivMod
+  , QuotRem
+  , Div
+  , Mod
+  , Quot
+  , Rem
+  , Abs
+  , Negate
+  , Recip
+  , GCD
+  , Simplify
   ) where
 
 import Data.TypeNums.Arithmetic

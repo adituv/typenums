@@ -16,11 +16,10 @@
 -- | This module exposes the inner workings of type-level arithmetic for
 --   further extensions.
 module Data.TypeNums.Arithmetic.Internal (
-  AddK, SubK, MulK, IntDivK, Abs, Negate, Recip, Simplify, Add, Sub, Mul, Div, DivMod, QuotRem, IntDiv, Mod, Quot, Rem, GCD
+  AddK, SubK, MulK, IntDivK, Abs, Negate, Recip, Simplify, Add, Sub, Mul, RatDiv, DivMod, QuotRem, Div, Mod, Quot, Rem, GCD
 ) where
 
 import Data.Type.Bool     (If)
-import Data.TypeNums.Equality (type (==?))
 import Data.TypeNums.Ints
 import Data.TypeNums.Rats
 import GHC.TypeLits(Nat)
@@ -78,14 +77,6 @@ type family MulK k1 k2 where
 type family IntDivK k where
   IntDivK Nat = Nat
   IntDivK TInt = TInt
-
--- | The kind of the result of finding the GCD of two integers
---
--- @since 0.1.4
-type family GCDK k1 k2 where
-  GCDK Nat Nat = Nat
-  GCDK TInt _ = TInt
-  GCDK _ TInt = TInt
 
 -- | The sum of two type-level numbers.
 --
@@ -183,18 +174,19 @@ type family Recip (x :: Rat) :: Rat where
 -- | The result of dividing two type-level numbers.
 --
 -- @since 0.1.4
-type family Div (x :: k1) (y :: k2) :: Rat where
-  Div (x :: Nat) (y :: Nat) = x ':% y
-  Div (x :: TInt) (y :: Nat) = x ':% y
-  Div (x :: Nat) ('Neg y) = ('Neg x) ':% y
-  Div (x :: TInt) ('Neg y) = (Negate x) ':% y
-  Div (x :: TInt) ('Pos y) = x ':% y
-  Div (x :: Rat) (y :: Rat) = Mul x (Recip y)
-  Div x (y :: Rat) = Mul (Div x 1) (Recip y)
-  Div (x :: Rat) y = Mul (Recip x) (Div y 1)
+type family RatDiv (x :: k1) (y :: k2) :: Rat where
+  RatDiv (x :: Nat) (y :: Nat) = x ':% y
+  RatDiv (x :: TInt) (y :: Nat) = x ':% y
+  RatDiv (x :: Nat) ('Pos y) = ('Pos x) ':% y
+  RatDiv (x :: Nat) ('Neg y) = ('Neg x) ':% y
+  RatDiv (x :: TInt) ('Neg y) = (Negate x) ':% y
+  RatDiv (x :: TInt) ('Pos y) = x ':% y
+  RatDiv (x :: Rat) (y :: Rat) = Mul x (Recip y)
+  RatDiv x (y :: Rat) = Mul (RatDiv x 1) (Recip y)
+  RatDiv (x :: Rat) y = Mul x (RatDiv 1 y)
 
 -- | The result of negating a 'TInt'
--- 
+--
 -- @since 0.1.4
 type family Negate (x :: TInt) :: TInt where
   Negate ('Pos 0) = 'Pos 0
@@ -203,26 +195,28 @@ type family Negate (x :: TInt) :: TInt where
   Negate ('Neg x) = 'Pos x
 
 -- | The quotient and remainder of a type-level integer and a natural number.
--- 
+--   For a negative dividend, the remainder part is positive such that
+--   x = q*y + r
 -- @since 0.1.4
 type family DivMod (x :: k) (y :: Nat) :: (IntDivK k, IntDivK k) where
   DivMod _ 0 = G.TypeError ('G.Text "Divisor must not be 0")
   DivMod (x :: Nat) y = UnPos (DivModAux ('Pos x) y ('Pos 0))
   DivMod ('Pos x) y = DivModAux ('Pos x) y ('Pos 0)
-  DivMod ('Neg x) y = DivModNegFixup (DivModAux ('Pos x) y ('Pos 0))
+  DivMod ('Neg x) y = DivModNegFixup (DivModAux ('Pos x) y ('Pos 0)) y
 
--- |
---
+-- | The quotient and remainder of a type-level integer and a natural number.
+--   For a negative dividend, the remainder part is negative such that
+--   x = q*y + r
 -- @since 0.1.4
 type family QuotRem (x :: k) (y :: Nat) :: (IntDivK k, IntDivK k) where
   QuotRem ('Neg x) y = QuotRemFixup (DivMod ('Neg x) y) y
   QuotRem x y = DivMod x y
 
 -- | The quotient of a type-level integer and a natural number.
---   
+--
 -- @since 0.1.4
-type family IntDiv (x :: k) (y :: Nat) :: IntDivK k where
-  IntDiv x y = Fst (DivMod x y)
+type family Div (x :: k) (y :: Nat) :: IntDivK k where
+  Div x y = Fst (DivMod x y)
 
 -- | The remainder of a type-level integer and a natural number
 --   For a negative number, behaves similarly to 'mod'.
@@ -232,21 +226,23 @@ type family Mod (x :: k) (y :: Nat) :: IntDivK k where
 
 -- Fixes up the calculated quotient for a negative dividend.
 -- Subtracts 1 to obtain the behaviour of 'div' instead of 'quot'
-type family DivModNegFixup (x :: (TInt, k)) :: (TInt, k) where
-  DivModNegFixup '(a, b) = '( Negate (Add 1 a), b )
+type family DivModNegFixup (x :: (TInt, TInt)) (y :: Nat) :: (TInt, TInt) where
+  DivModNegFixup '(a, b) y = '( Negate (Add 1 a), Sub y b )
 
 -- Converts the result of DivMod for a negative dividend
 -- into the result of QuotRem for a negative dividend
 type family QuotRemFixup (x :: (TInt, TInt)) (y :: Nat) :: (TInt, TInt) where
   QuotRemFixup '(d,m) y = '(Add 1 d, Sub m y)
 
--- |
+-- | The integer part of the result of dividing an integer by a
+--   natural number
 --
 -- @since 0.1.4
 type family Quot (x :: k) (y :: Nat) :: IntDivK k where
   Quot x y = Fst (QuotRem x y)
 
--- |
+-- | The remainder of the result of dividing an integer by a
+--   natural number
 --
 -- @since 0.1.4
 type family Rem (x :: k) (y :: Nat) :: IntDivK k where
@@ -255,7 +251,7 @@ type family Rem (x :: k) (y :: Nat) :: IntDivK k where
 -- Integer division of positive / positive
 type family DivModAux (x :: TInt) (y :: Nat) (a :: TInt) :: (TInt, TInt) where
   DivModAux ('Pos x) y a = DivModAux (Sub ('Pos x) y) y (Add 1 a)
-  DivModAux ('Neg x) y a = '(Sub a 1, If (x ==? y) ('Pos 0) ('Pos x))
+  DivModAux ('Neg x) y a = '(Sub a 1, Sub y ('Pos x))
 
 -- Internal function to unwrap a Pos TInt to a Nat
 type family UnPos (x :: k1) :: k2 where
@@ -280,10 +276,11 @@ type family Abs (x :: k) :: k where
 -- | The greatest common divisor of two type-level integers
 --
 -- @since 0.1.4
-type family GCD (x :: k1) (y :: k2) :: GCDK k1 k2 where
+type family GCD (x :: k1) (y :: k2) :: Nat where
   GCD (x :: Nat) (y :: Nat) = GCDAux x y
-  GCD (x :: Nat) (y :: TInt) = 'Pos (GCDAux x (UnPos (Abs y)))
-  GCD (x :: TInt) (y :: Nat) = 'Pos (GCDAux (UnPos (Abs x)) y)
+  GCD (x :: Nat) (y :: TInt) = GCDAux x (UnPos (Abs y))
+  GCD (x :: TInt) (y :: Nat) = GCDAux (UnPos (Abs x)) y
+  GCD (x :: TInt) (y :: TInt) = GCDAux (UnPos (Abs x)) (UnPos (Abs y))
 
 -- Euclidean algorithm for calculating the GCD of two natural numbers
 type family GCDAux (x :: Nat) (y :: Nat) :: Nat where
@@ -294,5 +291,5 @@ type family GCDAux (x :: Nat) (y :: Nat) :: Nat where
 --
 -- @since 0.1.4
 type family Simplify (x :: Rat) :: Rat where
-  Simplify ((x :: Nat) ':% y) = (IntDiv x (GCD x y)) ':% (IntDiv y (GCD x y))
-  Simplify ((x :: TInt) ':% y) = (IntDiv x (UnPos (GCD x y))) ':% (IntDiv y (UnPos (GCD x y)))
+  Simplify ((x :: Nat) ':% y) = (Quot x (GCD x y)) ':% (Quot y (GCD x y))
+  Simplify ((x :: TInt) ':% y) = (Quot x (GCD x y)) ':% (Quot y (GCD x y))
