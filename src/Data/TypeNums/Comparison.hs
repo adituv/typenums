@@ -40,6 +40,7 @@ type family (a :: k1) <=? (b :: k2) :: Bool where
   (n1 ':% d1) <=? (n2 ':% d2) = (n1 * d2) <=? (n2 * d1)
   a           <=? (n ':% d)   = (a * d) <=? n
   (n ':% d)   <=? b           = n <=? (b * d)
+  _           <=? _           = G.TypeError ('G.Text "Incomparable")
 
 type (a :: k1) <= (b :: k2) = (a <=? b) ~ 'True
 type (a :: k1) <  (b :: k2) = (b <=? a) ~ 'False

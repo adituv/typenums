@@ -68,6 +68,12 @@ type family MulK k1 k2 where
   MulK TInt Rat  = Rat
   MulK TInt TInt = TInt
 
+-- | The kind of the result of division by a natural number
+--
+-- @since 0.1.4
+type family IntDivK k where
+  IntDivK Nat = Nat
+  IntDivK TInt = TInt
 
 -- | The sum of two type-level numbers.
 --
@@ -153,3 +159,37 @@ type family Mul (x :: k1) (y :: k2) :: MulK k1 k2 where
   Mul (x :: Nat)  (n ':% d)   = (Mul x n) ':% d
   Mul ('Pos x)    (n ':% d)   = (Mul ('Pos x) n) ':% d
   Mul ('Neg x)    (n ':% d)   = (Mul ('Neg x) n) ':% d
+
+-- | The result of negating a 'TInt'
+-- 
+-- @since 0.1.4
+type family Negate (x :: TInt) :: TInt where
+  Negate ('Pos 0) = 'Pos 0
+  Negate ('Neg 0) = 'Pos 0
+  Negate ('Pos x) = 'Neg x
+  Negate ('Neg x) = 'Pos x
+
+-- | The quotient and remainder of a type-level integer and a natural number
+--
+-- @since 0.1.4
+type family DivMod (x :: k) (y :: Nat) :: (IntDivK k, IntDivK k) where
+  DivMod _ 0 = TypeError ('Text "Divisor must not be 0")
+  DivMod (x :: Nat) y = UnPos (DivModAux ('Pos x) y ('Pos 0))
+  DivMod ('Pos x) y = DivModAux ('Pos x) y ('Pos 0)
+  DivMod ('Neg x) y = DivModNegFixup (DivModAux ('Pos x) y ('Pos 0))
+
+-- DivModAux for a negative x calculates towards zero instead of down,
+-- so it is off by 1.  This handles the off-by-one error and the
+-- required negation of the quotient
+type family DivModNegFixup (x :: (TInt, k)) :: (TInt, k) where
+  DivModNegFixup '(a, b) = '( Negate (Add 1 a), b )
+
+-- Integer division of positive / positive
+type family DivModAux (x :: TInt) (y :: Nat) (a :: TInt) :: (TInt, TInt) where
+  DivModAux ('Pos x) y a = DivModAux (Sub ('Pos x) y) y (Add 1 a)
+  DivModAux ('Neg x) y a = '(Sub a 1, 'Pos x)
+
+-- Internal function to unwrap a Pos TInt to a Nat
+type family UnPos (x :: k1) :: k2 where
+  UnPos ('Pos x) = x
+  UnPos '( 'Pos x, 'Pos y) = '(x, y)
