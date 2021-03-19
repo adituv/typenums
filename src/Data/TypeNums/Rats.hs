@@ -64,10 +64,10 @@ instance {-# OVERLAPPING #-} (TypeError ('Text "Denominator must not equal 0")) 
 
 instance {-# OVERLAPS #-} forall k (n :: k) (d :: Nat). (KnownInt n, KnownNat d, d /= 0) =>
                           KnownRat (n ':% d) where
-  ratSing = SRat $! intVal' (proxy# @n) % natVal' (proxy# @d)
+  ratSing = SRat $! intVal' (proxy# :: Proxy# n) % natVal' (proxy# :: Proxy# d)
 
 instance {-# OVERLAPPABLE #-} forall k (n :: k). (KnownInt n) => KnownRat n where
-  ratSing = SRat $! intVal' (proxy# @n) % 1
+  ratSing = SRat $! intVal' (proxy# :: Proxy# n) % 1
 
 -- | Get the value associated with a type-level rational
 ratVal ::

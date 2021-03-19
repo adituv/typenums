@@ -54,13 +54,14 @@ class KnownInt (n :: k) where
   intSing :: SInt n
 
 instance forall (n :: Nat). KnownNat n => KnownInt n where
-  intSing = SInt $! natVal' (proxy# @n)
+  intSing = SInt $! natVal' (proxy# :: Proxy# n)
 
 instance forall (n :: Nat). KnownNat n => KnownInt ('Pos n) where
-  intSing = SInt $! natVal' (proxy# @n)
+  intSing = SInt $! natVal' (proxy# :: Proxy# n)
 
 instance forall (n :: Nat). KnownNat n => KnownInt ('Neg n) where
-  intSing = SInt $! negate (natVal' (proxy# @n))
+  intSing = SInt $! negate (natVal' (proxy# :: Proxy# n))
+
 
 -- | Get the value associated with a type-level integer
 intVal ::
