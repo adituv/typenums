@@ -90,6 +90,8 @@ module Data.TypeNums
   , Quot
   , Rem
   , GCD
+  , IntLog
+  , Log2
   ) where
 
 import Data.TypeNums.Arithmetic

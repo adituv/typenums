@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP                #-}
+{-# LANGUAGE DataKinds          #-}
 {-# LANGUAGE ExplicitNamespaces #-}
 {-# LANGUAGE PolyKinds          #-}
 {-# LANGUAGE Safe               #-}
@@ -23,6 +24,8 @@ module Data.TypeNums.Arithmetic
   , Mod
   , Quot
   , Rem
+  , IntLog
+  , Log2
   , Abs
   , Negate
   , Recip
@@ -61,3 +64,10 @@ type (/) a b = RatDiv a b
 --
 --   @since 0.1.4
 type (^) a b = Exp a b
+
+
+-- | The floor of the logarithm base 2 of a type-level number.
+--   Note that unlike 'GHC.TypeLits.Log2', this errors on @Log2 0@.
+--
+--   @since 0.1.4
+type Log2 x = IntLog 2 x

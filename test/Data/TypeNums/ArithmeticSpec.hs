@@ -14,6 +14,7 @@ module Data.TypeNums.ArithmeticSpec where
 
 import Data.TypeNums
 import Test.Hspec
+import Test.QuickCheck
 
 import Data.Proxy
 import Data.Ratio
@@ -34,6 +35,7 @@ spec = do
   simplifyTests
   expTests
   roundingTests
+  logTests
 
 additionTests :: Spec
 additionTests =
@@ -387,3 +389,30 @@ roundingTests = do
     it "rounds a negative rational towards +inf" $
       intVal (Proxy @(Ceiling ((Neg 25) ':% 3))) `shouldBe` (-8)
 
+logTests :: Spec
+logTests = do
+  describe "intlog" $ do
+    it "calculates log_2(8)" $
+      intVal (Proxy @(IntLog 2 8)) `shouldBe` 3
+    it "calculates log_2(3)" $
+      intVal (Proxy @(IntLog 2 3)) `shouldBe` 1
+    it "calculates log_3(8)" $
+      intVal (Proxy @(IntLog 3 8)) `shouldBe` 1
+    it "calculates log_3(9)" $
+      intVal (Proxy @(IntLog 3 9)) `shouldBe` 2
+    it "calcuclates log_3(2)" $
+      intVal (Proxy @(IntLog 3 2)) `shouldBe` 0
+    it "calculates log_2(1/2)" $
+      intVal (Proxy @(IntLog 2 (1 ':% 2))) `shouldBe` (-1)
+    it "calculates log_2(2/3)" $
+      intVal (Proxy @(IntLog 2 (2 ':% 3))) `shouldBe` (-1)
+    it "calculates log_2(1/3)" $
+      intVal (Proxy @(IntLog 2 (1 ':% 3))) `shouldBe` (-2)
+    it "calculates log_3(1/27)" $
+      intVal (Proxy @(IntLog 3 (1 ':% 27))) `shouldBe` (-3)
+    it "calculates log_3(1/2)" $
+      intVal (Proxy @(IntLog 3 (1 ':% 2))) `shouldBe` (-1)
+    it "calculates log_3(3/5)" $
+      intVal (Proxy @(IntLog 3 (3 ':% 5))) `shouldBe` (-1)
+    it "calculates log_6(3/5)" $
+      intVal (Proxy @(IntLog 6 (3 ':% 5))) `shouldBe` (-1)

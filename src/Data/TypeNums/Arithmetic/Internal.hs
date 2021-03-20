@@ -47,9 +47,11 @@ module Data.TypeNums.Arithmetic.Internal (
   , Rem
   , GCD
   , Exp
+  , IntLog
 ) where
 
 import Data.Type.Bool     (If)
+import qualified Data.Type.Equality as DTE
 import Data.TypeNums.Ints
 import Data.TypeNums.Rats.Type
 import GHC.TypeLits(Nat)
@@ -330,7 +332,7 @@ type family GCDAux (x :: Nat) (y :: Nat) :: Nat where
 --
 -- @since 0.1.4
 type family Simplify (x :: Rat) :: Rat where
-  Simplify ((x :: Nat) ':% y) = (Quot x (GCD x y)) ':% (Quot y (GCD x y))
+  Simplify ((x :: Nat) ':% y) = (Quot ('Pos x) (GCD x y)) ':% (Quot y (GCD x y))
   Simplify ((x :: TInt) ':% y) = (Quot x (GCD x y)) ':% (Quot y (GCD x y))
 
 -- | Exponentiation of a type-level number by an integer
@@ -377,3 +379,36 @@ type family Ceiling (x :: k) :: TInt where
   Ceiling (x :: TInt) = x
   Ceiling (x ':% 0)   = G.TypeError ('G.Text ("The denominator must not be 0"))
   Ceiling (x ':% y)   = Add 1 (Floor (Sub x 1 ':% y))
+
+-- | The floor of the logarithm of a type-level number
+--   NB. unlike 'G.Log2', @Log n 0@ here is a type error.
+--
+-- @since 0.1.4
+type family IntLog (n :: Nat) (x :: k) :: TInt where
+  IntLog 0 _ = G.TypeError ('G.Text "Invalid IntLog base: 0")
+  IntLog 1 _ = G.TypeError ('G.Text "Invalid IntLog base: 1")
+  IntLog _ 0 = G.TypeError ('G.Text "IntLog n 0 is infinite")
+  IntLog _ ('Pos 0) = G.TypeError ('G.Text "IntLog n 0 is infinite")
+  IntLog _ ('Neg 0) = G.TypeError ('G.Text "IntLog n 0 is infinite")
+  IntLog _ (0 ':% _) = G.TypeError ('G.Text "IntLog n 0 is infinite")
+  IntLog _ (_ ':% 0) = G.TypeError ('G.Text "IntLog parameter has zero denominator")
+  IntLog _ ('Neg _) = G.TypeError ('G.Text "IntLog of a negative does not exist")
+  IntLog n (x :: Nat) = IntLog n ('Pos x)
+  IntLog n ('Pos x) = IntLogAux n ('Pos x)
+  IntLog n (x :: Rat) =
+    If (Floor x DTE.== 'Pos 0)  -- Using DTE here to avoid a module cycle
+      (NegLogFudge n x (Negate (IntLogAux n (Floor (Recip x)))))
+      (IntLog n (Floor x))
+
+type family IntLogAux (n :: Nat) (x :: TInt) :: TInt where
+  IntLogAux n ('Pos 0) = 'Neg 1
+  IntLogAux n ('Pos 1) = 'Pos 0
+  IntLogAux n ('Pos x) = Add 1 (IntLogAux n (Div ('Pos x) n))
+
+-- There's an off-by-one error for 0 < r < 1 when r is not exactly b^(-n)
+-- Just get it working
+type family NegLogFudge (n :: Nat) (x :: Rat) (lg :: TInt) where
+  NegLogFudge n x lg =
+    If (Simplify (Exp n lg) DTE.== Simplify x)
+      lg
+      (Sub lg 1)

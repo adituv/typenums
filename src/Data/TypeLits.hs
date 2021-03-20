@@ -86,10 +86,8 @@ module Data.TypeLits
   , Quot
   , Rem
   , GCD
-
-#if MIN_VERSION_base(4,11,0)
-  , G.Log2
-#endif
+  , IntLog
+  , Log2
 
     -- * Symbols
   , G.Symbol
@@ -107,7 +105,6 @@ module Data.TypeLits
     -- * User-defined type errors
   , G.TypeError
   , G.ErrorMessage(..)
-
   ) where
 
 import Data.TypeNums
