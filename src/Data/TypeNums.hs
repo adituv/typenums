@@ -38,6 +38,7 @@ module Data.TypeNums
   , G.natVal'
   , G.SomeNat(..)
   , G.someNatVal
+
     -- ** Integers
   , TInt(..)
   , KnownInt
@@ -45,6 +46,7 @@ module Data.TypeNums
   , intVal'
   , SomeInt(..)
   , someIntVal
+
     -- ** Rationals
   , Rat((:%))
   , KnownRat
@@ -52,6 +54,8 @@ module Data.TypeNums
   , ratVal'
   , SomeRat(..)
   , someRatVal
+  , Simplify
+
     -- * Type level numerical operations
     -- ** Comparisons
   , type (==?)
@@ -63,22 +67,29 @@ module Data.TypeNums
   , type (<)
   , type (>=)
   , type (>)
+
     -- ** Arithmetic
+    -- *** Unary Operations
+  , Abs
+  , Negate
+  , Recip
+  , Floor
+  , Ceiling
+  , Truncate
+
+    -- *** Binary Operations
   , type (+)
   , type (-)
   , type (*)
   , type (/)
+  , type (^)
   , DivMod
   , QuotRem
   , Div
   , Mod
   , Quot
   , Rem
-  , Abs
-  , Negate
-  , Recip
   , GCD
-  , Simplify
   ) where
 
 import Data.TypeNums.Arithmetic

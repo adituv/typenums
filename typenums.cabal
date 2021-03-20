@@ -34,6 +34,7 @@ library
       Data.TypeNums.Arithmetic
       Data.TypeNums.Comparison
       Data.TypeNums.Equality
+      Data.TypeNums.Rats.Type
   hs-source-dirs:
       src
   ghc-options: -Wall

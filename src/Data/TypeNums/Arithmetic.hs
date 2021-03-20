@@ -16,6 +16,7 @@ module Data.TypeNums.Arithmetic
   , type (-)
   , type (*)
   , type (/)
+  , type (^)
   , DivMod
   , QuotRem
   , Div
@@ -27,6 +28,9 @@ module Data.TypeNums.Arithmetic
   , Recip
   , GCD
   , Simplify
+  , Truncate
+  , Floor
+  , Ceiling
   ) where
 
 import Data.TypeNums.Arithmetic.Internal
@@ -50,3 +54,10 @@ type (*) a b = Mul a b
 
 -- | The ratio of two type-level numbers
 type (/) a b = RatDiv a b
+
+-- | A type-level number raised to an integer power.  For 'Nat' powers, the
+--   result kind is the same as the base.  For 'TInt' powers, the result kind
+--   is 'Rat'.
+--
+--   @since 0.1.4
+type (^) a b = Exp a b

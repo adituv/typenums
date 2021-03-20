@@ -32,6 +32,8 @@ spec = do
   quotRemTests
   gcdTests
   simplifyTests
+  expTests
+  roundingTests
 
 additionTests :: Spec
 additionTests =
@@ -210,6 +212,8 @@ divModTests = do
       getIntVals (Proxy @(DivMod (Pos 29) 5)) `shouldBe` (29 `divMod` 5)
     it "calculates divMod for a negative integer and a natural" $
       getIntVals (Proxy @(DivMod (Neg 29) 5)) `shouldBe` ((-29) `divMod` 5)
+    it "calculates divMod for a negative integer and 1" $
+      getIntVals (Proxy @(DivMod (Neg 3) 1)) `shouldBe` ((-3) `divMod` 1)
   describe "div" $ do
     it "calculates div for two naturals" $
       intVal (Proxy @(Div 29 5)) `shouldBe` (29 `div` 5)
@@ -217,6 +221,8 @@ divModTests = do
       intVal (Proxy @(Div (Pos 29) 5)) `shouldBe` (29 `div` 5)
     it "calculates div for a negative integer and a natural" $
       intVal (Proxy @(Div (Neg 29) 5)) `shouldBe` ((-29) `div` 5)
+    it "divides a negative number by 1" $
+      intVal (Proxy @(Div (Neg 3) 1)) `shouldBe` (-3)
   describe "mod" $ do
     it "calculates mod for two naturals" $
       intVal (Proxy @(Mod 29 5)) `shouldBe` (29 `mod` 5)
@@ -224,6 +230,8 @@ divModTests = do
       intVal (Proxy @(Mod (Pos 29) 5)) `shouldBe` (29 `mod` 5)
     it "calculates mod for a negative integer and a natural" $
       intVal (Proxy @(Mod (Neg 29) 5)) `shouldBe` ((-29) `mod` 5)
+    it "calculates mod for a negative integer and 1" $
+      intVal (Proxy @(Mod (Neg 3) 1)) `shouldBe` 0
 
 quotRemTests :: Spec
 quotRemTests = do
@@ -234,6 +242,8 @@ quotRemTests = do
       getIntVals (Proxy @(QuotRem (Pos 29) 5)) `shouldBe` (29 `quotRem` 5)
     it "calculates quotRem for a negative integer and a natural" $
       getIntVals (Proxy @(QuotRem (Neg 29) 5)) `shouldBe` ((-29) `quotRem` 5)
+    it "calculates quotRem for a negative integer and 1" $
+      getIntVals (Proxy @(QuotRem (Neg 3) 1)) `shouldBe` ((-3) `quotRem` 1)
   describe "quot" $ do
     it "calculates quot for two naturals" $
       intVal (Proxy @(Quot 29 5)) `shouldBe` (29 `quot` 5)
@@ -241,6 +251,8 @@ quotRemTests = do
       intVal (Proxy @(Quot (Pos 29) 5)) `shouldBe` (29 `quot` 5)
     it "calculates quot for a negative integer and a natural" $
       intVal (Proxy @(Quot (Neg 29) 5)) `shouldBe` ((-29) `quot` 5)
+    it "calculates quotRem for a negative integer and 1" $
+      intVal (Proxy @(Quot (Neg 3) 1)) `shouldBe` (-3)
   describe "rem" $ do
     it "calculates rem for two naturals" $
       intVal (Proxy @(Rem 29 5)) `shouldBe` (29 `rem` 5)
@@ -248,6 +260,8 @@ quotRemTests = do
       intVal (Proxy @(Rem (Pos 29) 5)) `shouldBe` (29 `rem` 5)
     it "calculates rem for a negative integer and a natural" $
       intVal (Proxy @(Rem (Neg 29) 5)) `shouldBe` ((-29) `rem` 5)
+    it "calculates rem for a negative integer and 1" $
+      intVal (Proxy @(Rem (Neg 3) 1)) `shouldBe` 0
 
 gcdTests :: Spec
 gcdTests = do
@@ -292,3 +306,84 @@ simplifyTests = do
       rawRatVals (Proxy @(Simplify ((Pos 4) :% 6))) `shouldBe` (2, 3)
     it "reduces a (neg, int) unreduced fraction" $
       rawRatVals (Proxy @(Simplify ((Neg 4) :% 6))) `shouldBe` ((-2), 3)
+
+expTests :: Spec
+expTests = do
+  describe "exp" $ do
+    it "calculates x^0 for natural x" $
+      natVal (Proxy @(3^0)) `shouldBe` 1
+    it "calculates x^(+0) for natural x" $
+      ratVal (Proxy @(3^(Pos 0))) `shouldBe` 1 % 1
+    it "calculates x^(-0) for natural x" $
+      ratVal (Proxy @(3^(Neg 0))) `shouldBe` 1 % 1
+    it "calculates x^0 for integer x" $
+      intVal (Proxy @((Pos 3)^0)) `shouldBe` 1
+    it "calculates x^(+0) for integer x" $
+      ratVal (Proxy @((Pos 3)^(Pos 0))) `shouldBe` 1 % 1
+    it "calculates x^(-0) for integer x" $
+      ratVal (Proxy @((Pos 3)^(Neg 0))) `shouldBe` 1 % 1
+    it "calculates x^0 for rational x" $
+      ratVal (Proxy @((3 :% 5)^0)) `shouldBe` 1
+    it "calculates x^(+0) for rational x" $
+      ratVal (Proxy @((3 :% 5)^(Pos 0))) `shouldBe` 1 % 1
+    it "calculates x^(-0) for rational x" $
+      ratVal (Proxy @((3 :% 5)^(Neg 0))) `shouldBe` 1 % 1
+    it "calculates x^y for natural x,y" $
+      natVal (Proxy @(5^3)) `shouldBe` 125
+    it "calculates (+x)^y for natural y" $
+      intVal (Proxy @((Pos 5)^3)) `shouldBe` 125
+
+roundingTests :: Spec
+roundingTests = do
+  describe "truncate" $ do
+    it "acts as a no-op on a natural" $
+      intVal (Proxy @(Truncate 3)) `shouldBe` 3
+    it "acts as a no-op on a positive int" $
+      intVal (Proxy @(Truncate (Pos 3))) `shouldBe` 3
+    it "acts as a no-op on a negative int" $
+      intVal (Proxy @(Truncate (Neg 3))) `shouldBe` (-3)
+    it "acts as a no-op on (x % 1) for natural x" $
+      intVal (Proxy @(Truncate (3 ':% 1))) `shouldBe` 3
+    it "acts as a no-op on (x % 1) for positive x" $
+      intVal (Proxy @(Truncate ((Pos 3) ':% 1))) `shouldBe` 3
+    it "acts as a no-op on (x % 1) for negative x" $
+      intVal (Proxy @(Truncate ((Neg 3) ':% 1))) `shouldBe` (-3)
+    it "rounds a positive rational towards 0" $
+      intVal (Proxy @(Truncate (25 ':% 3))) `shouldBe` 8
+    it "rounds a negative rational towards 0" $
+      intVal (Proxy @(Truncate ((Neg 25) ':% 3))) `shouldBe` (-8)
+  describe "floor" $ do
+    it "acts as a no-op on a natural" $
+      intVal (Proxy @(Floor 3)) `shouldBe` 3
+    it "acts as a no-op on a positive int" $
+      intVal (Proxy @(Floor (Pos 3))) `shouldBe` 3
+    it "acts as a no-op on a negative int" $
+      intVal (Proxy @(Floor (Neg 3))) `shouldBe` (-3)
+    it "acts as a no-op on (x % 1) for natural x" $
+      intVal (Proxy @(Floor (3 ':% 1))) `shouldBe` 3
+    it "acts as a no-op on (x % 1) for positive x" $
+      intVal (Proxy @(Floor ((Pos 3) ':% 1))) `shouldBe` 3
+    it "acts as a no-op on (x % 1) for negative x" $
+      intVal (Proxy @(Floor ((Neg 3) ':% 1))) `shouldBe` (-3)
+    it "rounds a positive rational towards -inf" $
+      intVal (Proxy @(Floor (25 ':% 3))) `shouldBe` 8
+    it "rounds a negative rational towards -inf" $
+      intVal (Proxy @(Floor ((Neg 25) ':% 3))) `shouldBe` (-9)
+  describe "ceiling" $ do
+    it "acts as a no-op on a natural" $
+      intVal (Proxy @(Ceiling 3)) `shouldBe` 3
+    it "acts as a no-op on a positive int" $
+      intVal (Proxy @(Ceiling (Pos 3))) `shouldBe` 3
+    it "acts as a no-op on a negative int" $
+      intVal (Proxy @(Ceiling (Neg 3))) `shouldBe` (-3)
+    it "acts as a no-op on (x % 1) for natural x" $
+      intVal (Proxy @(Ceiling (3 ':% 1))) `shouldBe` 3
+    it "acts as a no-op on (x % 1) for positive x" $
+      intVal (Proxy @(Ceiling ((Pos 3) ':% 1))) `shouldBe` 3
+    it "acts as a no-op on (x % 1) for negative x" $
+      intVal (Proxy @(Ceiling ((Neg 3) ':% 1))) `shouldBe` (-3)
+    it "rounds a positive rational towards +inf" $
+      intVal (Proxy @(Ceiling (25 ':% 3))) `shouldBe` 9
+    it "rounds a negative rational towards +inf" $
+      intVal (Proxy @(Ceiling ((Neg 25) ':% 3))) `shouldBe` (-8)
+

@@ -42,6 +42,7 @@ module Data.TypeLits
   , intVal'
   , SomeInt(..)
   , someIntVal
+
     -- ** Rationals
   , Rat((:%))
   , KnownRat
@@ -49,6 +50,8 @@ module Data.TypeLits
   , ratVal'
   , SomeRat(..)
   , someRatVal
+  , Simplify
+
     -- * Type level numerical operations
     -- ** Comparison
   , type (==?)
@@ -60,24 +63,30 @@ module Data.TypeLits
   , type (<)
   , type (>=)
   , type (>)
+
     -- ** Arithmetic
+    -- *** Unary operations
+  , Abs
+  , Negate
+  , Recip
+  , Floor
+  , Ceiling
+  , Truncate
+
+    -- *** Binary operations
   , type (+)
   , type (-)
   , type (*)
   , type (/)
+  , type (^)
   , DivMod
   , QuotRem
   , Div
   , Mod
   , Quot
   , Rem
-  , Abs
-  , Negate
-  , Recip
   , GCD
-  , Simplify
 
-  , type (G.^)
 #if MIN_VERSION_base(4,11,0)
   , G.Log2
 #endif

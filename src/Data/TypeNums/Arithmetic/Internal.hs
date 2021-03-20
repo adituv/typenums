@@ -16,12 +16,42 @@
 -- | This module exposes the inner workings of type-level arithmetic for
 --   further extensions.
 module Data.TypeNums.Arithmetic.Internal (
-  AddK, SubK, MulK, IntDivK, Abs, Negate, Recip, Simplify, Add, Sub, Mul, RatDiv, DivMod, QuotRem, Div, Mod, Quot, Rem, GCD
+  -- * Kind Results
+    AddK
+  , SubK
+  , MulK
+  , IntDivK
+  , ExpK
+
+  -- * Unary operations
+  , Abs
+  , Negate
+  , Recip
+  , Simplify
+
+  -- ** Rounding operations
+  , Truncate
+  , Floor
+  , Ceiling
+
+  -- * Binary operations
+  , Add
+  , Sub
+  , Mul
+  , RatDiv
+  , DivMod
+  , QuotRem
+  , Div
+  , Mod
+  , Quot
+  , Rem
+  , GCD
+  , Exp
 ) where
 
 import Data.Type.Bool     (If)
 import Data.TypeNums.Ints
-import Data.TypeNums.Rats
+import Data.TypeNums.Rats.Type
 import GHC.TypeLits(Nat)
 import qualified GHC.TypeLits as G
 
@@ -61,15 +91,13 @@ type family SubK k1 k2 where
 --
 -- @since 0.1.2
 type family MulK k1 k2 where
-  MulK Nat  Nat  = Nat
+  MulK k    k    = k
   MulK Nat  Rat  = Rat
   MulK Nat  TInt = TInt
   MulK Rat  Nat  = Rat
-  MulK Rat  Rat  = Rat
   MulK Rat  TInt = Rat
   MulK TInt Nat  = TInt
   MulK TInt Rat  = Rat
-  MulK TInt TInt = TInt
 
 -- | The kind of the result of division by a natural number
 --
@@ -77,6 +105,13 @@ type family MulK k1 k2 where
 type family IntDivK k where
   IntDivK Nat = Nat
   IntDivK TInt = TInt
+
+-- | The kind of the result of type-level exponentiation
+type family ExpK k1 k2 where
+  ExpK Nat Nat = Nat
+  ExpK TInt Nat = TInt
+  ExpK Rat Nat = Rat
+  ExpK _   TInt = Rat
 
 -- | The sum of two type-level numbers.
 --
@@ -227,11 +262,15 @@ type family Mod (x :: k) (y :: Nat) :: IntDivK k where
 -- Fixes up the calculated quotient for a negative dividend.
 -- Subtracts 1 to obtain the behaviour of 'div' instead of 'quot'
 type family DivModNegFixup (x :: (TInt, TInt)) (y :: Nat) :: (TInt, TInt) where
+  DivModNegFixup '(a, 'Pos 0) y = '( Negate a, 'Pos 0 )
+  DivModNegFixup '(a, 'Neg 0) y = '( Negate a, 'Pos 0 )
   DivModNegFixup '(a, b) y = '( Negate (Add 1 a), Sub y b )
 
 -- Converts the result of DivMod for a negative dividend
 -- into the result of QuotRem for a negative dividend
 type family QuotRemFixup (x :: (TInt, TInt)) (y :: Nat) :: (TInt, TInt) where
+  QuotRemFixup '(d, 'Pos 0) y = '( d, 'Pos 0 )
+  QuotRemFixup '(d, 'Neg 0) y = '( d, 'Pos 0 )
   QuotRemFixup '(d,m) y = '(Add 1 d, Sub m y)
 
 -- | The integer part of the result of dividing an integer by a
@@ -293,3 +332,48 @@ type family GCDAux (x :: Nat) (y :: Nat) :: Nat where
 type family Simplify (x :: Rat) :: Rat where
   Simplify ((x :: Nat) ':% y) = (Quot x (GCD x y)) ':% (Quot y (GCD x y))
   Simplify ((x :: TInt) ':% y) = (Quot x (GCD x y)) ':% (Quot y (GCD x y))
+
+-- | Exponentiation of a type-level number by an integer
+--
+-- @since 0.1.4
+type family Exp (x :: k1) (y :: k2) :: ExpK k1 k2 where
+  Exp (x :: Nat)  (y :: Nat) = ExpAux 1 x y
+  Exp (x :: TInt) (y :: Nat) = ExpAux ('Pos 1) x y
+  Exp (x :: Rat)  (y :: Nat) = ExpAux (1 ':% 1) x y
+  Exp (x :: Rat)  ('Pos y)   = ExpAux (1 ':% 1) x y
+  Exp (x :: Rat)  ('Neg y)   = Recip (ExpAux (1 ':% 1) x y)
+  Exp x           ('Pos y)   = ExpAux (1 ':% 1) (x ':% 1) y
+  Exp x           ('Neg y)   = Recip (ExpAux (1 ':% 1) (x ':% 1) y)
+
+type family ExpAux (acc :: k1) (x :: k1) (y :: Nat) :: k1 where
+  ExpAux acc _ 0 = acc
+  ExpAux acc x y = ExpAux (Mul x acc) x (Sub y 1)
+
+-- | Round a type-level number towards zero
+--
+-- @since 0.1.4
+type family Truncate (x :: k) :: TInt where
+  Truncate (x :: Nat)          = 'Pos x
+  Truncate (x :: TInt)         = x
+  Truncate (x ':% 0)           = G.TypeError ('G.Text ("The denominator must not be 0"))
+  Truncate ((x :: Nat) ':% y)  = 'Pos (Quot x y)
+  Truncate ((x :: TInt) ':% y) = Quot x y
+
+-- | Round a type-level number towards negative infinity
+--
+-- @since 0.1.4
+type family Floor (x :: k) :: TInt where
+  Floor (x :: Nat)          = 'Pos x
+  Floor (x :: TInt)         = x
+  Floor (x ':% 0)           = G.TypeError ('G.Text ("The denominator must not be 0"))
+  Floor ((x :: Nat) ':% y)  = 'Pos (Div x y)
+  Floor ((x :: TInt) ':% y) = Div x y
+
+-- | Round a type-level number towards positive infinity
+--
+-- @since 0.1.4
+type family Ceiling (x :: k) :: TInt where
+  Ceiling (x :: Nat)  = 'Pos x
+  Ceiling (x :: TInt) = x
+  Ceiling (x ':% 0)   = G.TypeError ('G.Text ("The denominator must not be 0"))
+  Ceiling (x ':% y)   = Add 1 (Floor (Sub x 1 ':% y))

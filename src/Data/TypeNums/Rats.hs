@@ -37,6 +37,7 @@ module Data.TypeNums.Rats
 
 import Data.TypeNums.Equality (type (/=))
 import Data.TypeNums.Ints
+import Data.TypeNums.Rats.Type(Rat(..))
 
 import Data.Bifunctor (first)
 import Data.Proxy     (Proxy (..))
@@ -44,10 +45,6 @@ import Data.Ratio     ((%))
 import GHC.Exts       (Proxy#, proxy#)
 import GHC.TypeLits   (ErrorMessage (..), KnownNat, Nat, TypeError, natVal')
 import Unsafe.Coerce  (unsafeCoerce)
-
--- | Type constructor for a rational
-data Rat =
-  forall k. k :% Nat
 
 newtype SRat r =
   SRat Rational
