@@ -198,7 +198,7 @@ type family Mul (x :: k1) (y :: k2) :: MulK k1 k2 where
   Mul x          (y :: Rat) = Simplify (MulRat (x ':% 1) y)
 
 type family MulRat (x :: Rat) (y :: Rat) :: Rat where
-  Mul (n1 ':% d1) (n2 ':% d2) = (Mul n1 n2) ':% (Mul d1 d2)
+  MulRat (n1 ':% d1) (n2 ':% d2) = (Mul n1 n2) ':% (Mul d1 d2)
 
 -- | The reciprocal of a type-level number
 --
