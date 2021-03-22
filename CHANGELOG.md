@@ -4,6 +4,20 @@ Change log
 typenums uses [PVP Versioning][1].
 The change log is available [on GitHub][2].
 
+0.1.4
+=====
+* Added rational simplification
+* Added more arithmetic functionality:
+  * Reciprocals
+  * Division
+  * Integer division and remainder (DivMod, QuotRem...)
+  * Absolute value
+  * GCD, LCM
+  * Exponentiation
+  * Rounding (Floor, Ceiling, Truncate)
+  * Integer logarithm
+* Rewrote arithmetic tests to compare types directly
+
 0.1.3
 =====
 * Dropped support for GHC 8.2
