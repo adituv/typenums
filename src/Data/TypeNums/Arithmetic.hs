@@ -30,6 +30,7 @@ module Data.TypeNums.Arithmetic
   , Negate
   , Recip
   , GCD
+  , LCM
   , Simplify
   , Truncate
   , Floor

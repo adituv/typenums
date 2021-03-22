@@ -47,6 +47,7 @@ module Data.TypeNums.Arithmetic.Internal (
   , Quot
   , Rem
   , GCD
+  , LCM
   , Exp
   , IntLog
 ) where
@@ -331,6 +332,15 @@ type family GCD (x :: k1) (y :: k2) :: Nat where
 type family GCDAux (x :: Nat) (y :: Nat) :: Nat where
   GCDAux x 0 = x
   GCDAux x y = GCDAux y (Rem x y)
+
+-- | The least common multiple of two type-level integers
+--
+-- @since 0.1.4
+type family LCM (x :: k1) (y :: k2) :: Nat where
+  LCM (x :: Nat) (y :: Nat) = Mul (Div (Abs x) (GCD x y)) (Abs y)
+  LCM (x :: Nat) (y :: TInt) = UnPos (Mul (Div (Abs x) (GCD x y)) (Abs y))
+  LCM (x :: TInt) (y :: Nat) = UnPos (Mul (Div (Abs x) (GCD x y)) (Abs y))
+  LCM (x :: TInt) (y :: TInt) = UnPos (Mul (Div (Abs x) (GCD x y)) (Abs y))
 
 -- | Reduce a type-level rational into its canonical form
 --
