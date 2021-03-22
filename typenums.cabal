@@ -43,7 +43,7 @@ library
     ghc-options: -Wall -Winferred-safe-imports -Wmissing-safe-haskell-mode
 
   build-depends:
-      base >4.9 && <5.0
+      base >=4.10 && <5.0
   default-language: Haskell2010
 
 test-suite typenums-tests
@@ -55,12 +55,13 @@ test-suite typenums-tests
       Data.TypeNums.IntsSpec
       Data.TypeNums.RatsSpec
       Paths_typenums
+      TestUtil
   hs-source-dirs:
       test
   ghc-options: -Wall -Wno-all
   build-depends:
       QuickCheck >=2.0
-    , base >4.9 && <5.0
+    , base >=4.10 && <5.0
     , hspec >=2.0
     , typenums
   build-tool-depends:

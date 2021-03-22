@@ -9,15 +9,7 @@ module Data.TypeNums.ComparisonSpec where
 import Data.TypeNums
 
 import Test.Hspec
-
-class DemoteBool (a :: Bool) where
-  demote :: Bool
-
-instance DemoteBool 'True where
-  demote = True
-
-instance DemoteBool 'False where
-  demote = False
+import TestUtil
 
 spec :: Spec
 spec = do

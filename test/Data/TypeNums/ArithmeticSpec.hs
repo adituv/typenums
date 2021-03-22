@@ -13,12 +13,12 @@
 module Data.TypeNums.ArithmeticSpec where
 
 import Data.TypeNums
-import Test.Hspec
-import Test.QuickCheck
+import Test.Hspec(Spec, describe, it, shouldBe)
 
-import Data.Proxy
-import Data.Ratio
+import Data.Proxy(Proxy(..))
+import Data.Ratio((%))
 import GHC.Exts(Proxy#, proxy#)
+import TestUtil(typesShouldBeEqual)
 
 spec :: Spec
 spec = do
@@ -41,125 +41,153 @@ additionTests :: Spec
 additionTests =
   describe "addition" $ do
     it "correctly adds two natural numbers" $
-      ratVal (Proxy @(3 + 5)) `shouldBe` 8
+      typesShouldBeEqual @Nat @(3 + 5) @8
     it "correctly adds a negative integer and a natural" $
-      ratVal (Proxy @((Neg 4) + 3)) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(Neg 4 + 3) @(Neg 1)
     it "correctly adds a natural and a negative integer" $
-      ratVal (Proxy @(8 + (Neg 7))) `shouldBe` 1
+      typesShouldBeEqual @TInt @(8 + Neg 7) @(Pos 1)
     it "correctly adds two negative integers" $
-      ratVal (Proxy @((Neg 5) + (Neg 6))) `shouldBe` (-11)
+      typesShouldBeEqual @TInt @(Neg 5 + Neg 6) @(Neg 11)
     it "correctly adds two positive integers" $
-      ratVal (Proxy @((Pos 5) + (Pos 6))) `shouldBe` 11
+      typesShouldBeEqual @TInt @(Pos 5 + Pos 6) @(Pos 11)
     it "correctly adds a negative integer and a positive integer" $
-      ratVal (Proxy @((Neg 3) + (Pos 5))) `shouldBe` 2
+      typesShouldBeEqual @TInt @(Neg 3 + Pos 5) @(Pos 2)
     it "correctly adds a positive integer and a negative integer" $
-      ratVal (Proxy @((Pos 7) + (Neg 8))) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(Pos 7 + Neg 8) @(Neg 1)
     it "correctly adds two rationals" $
-      ratVal (Proxy @((2 ':% 3) + (5 ':% 7))) `shouldBe` (29 % 21)
+      typesShouldBeEqual @Rat @(2:%3 + 5:%7) @(Pos 29 :% 21)
     it "correctly adds a rational with a natural" $
-      ratVal (Proxy @((2 ':% 3) + 2)) `shouldBe` (8 % 3)
+      typesShouldBeEqual @Rat @(2:%3 + 2) @(Pos 8 :% 3)
     it "correctly adds a natural with a rational" $
-      ratVal (Proxy @(2 + (2 ':% 3))) `shouldBe` (8 % 3)
+      typesShouldBeEqual @Rat @(2 + 2:%3) @(Pos 8 :% 3)
     it "correctly adds a rational with a negative integer" $
-      ratVal (Proxy @((2 ':% 3) + (Neg 2))) `shouldBe` ((-4) % 3)
+      typesShouldBeEqual @Rat @(2':%3 + Neg 2) @(Neg 4 :% 3)
     it "correctly adds a negative integer with a rational" $
-      ratVal (Proxy @((Neg 2) + (2 ':% 3))) `shouldBe` ((-4) % 3)
+      typesShouldBeEqual @Rat @(Neg 2 + 2:%3) @(Neg 4 :% 3)
     it "correctly adds a rational with a positive integer" $
-      ratVal (Proxy @((2 ':% 3) + (Pos 2))) `shouldBe` 8 % 3
+      typesShouldBeEqual @Rat @(2:%3 + Pos 2) @(Pos 8 :% 3)
     it "correctly adds a positive integer with a rational" $
-      ratVal (Proxy @((Pos 2) + (2 ':% 3))) `shouldBe` 8 % 3
+      typesShouldBeEqual @Rat @(Pos 2 + 2:%3) @(Pos 8 :% 3)
+    it "correctly simplifies the result of adding two rationals" $
+      typesShouldBeEqual @Rat @(3:%4 + 3:%4) @(Pos 3 :% 2)
 
 subtractionTests :: Spec
 subtractionTests =
   describe "subtraction" $ do
     it "correctly subtracts two natural numbers" $
-      ratVal (Proxy @(5 - 3)) `shouldBe` 2
+      typesShouldBeEqual @Nat @(5-3) @2
     it "correctly subtracts a negative integer and a natural" $
-      ratVal (Proxy @((Neg 4) - 3)) `shouldBe` (-7)
+      typesShouldBeEqual @TInt @(Neg 4 - 3) @(Neg 7)
     it "correctly subtracts a natural and a negative integer" $
-      ratVal (Proxy @(8 - (Neg 7))) `shouldBe` 15
+      typesShouldBeEqual @TInt @(8 - Neg 7) @(Pos 15)
     it "correctly subtracts two negative integers" $
-      ratVal (Proxy @((Neg 5) - (Neg 6))) `shouldBe` 1
+      typesShouldBeEqual @TInt @(Neg 5 - Neg 6) @(Pos 1)
     it "correctly subtracts two positive integers" $
-      ratVal (Proxy @((Pos 5) - (Pos 6))) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(Pos 5 - Pos 6) @(Neg 1)
     it "correctly subtracts a negative integer and a positive integer" $
-      ratVal (Proxy @((Neg 3) - (Pos 5))) `shouldBe` (-8)
+      typesShouldBeEqual @TInt @(Neg 3 - Pos 5) @(Neg 8)
     it "correctly subtracts a positive integer and a negative integer" $
-      ratVal (Proxy @((Pos 7) - (Neg 8))) `shouldBe` 15
-    it "correctly subtracts two rationals" $
-      ratVal (Proxy @((2 ':% 3) - (5 ':% 7))) `shouldBe` ((-1) % 21)
+      typesShouldBeEqual @TInt @(Pos 7 - Neg 8) @(Pos 15)
+    it "correctly subtracts two rationals with a negative result" $
+      typesShouldBeEqual @Rat @(2:%3 - 5:%7) @(Neg 1 :% 21)
+    it "correctly subtracts two rationals with a positive result" $
+      typesShouldBeEqual @Rat @(5:%7 - 2:%3) @(Pos 1 :% 21)
     it "correctly subtracts a rational with a natural" $
-      ratVal (Proxy @((2 ':% 3) - 2)) `shouldBe` ((-4) % 3)
+      typesShouldBeEqual @Rat @(2:%3 - 2) @(Neg 4 :% 3)
     it "correctly subtracts a natural with a rational" $
-      ratVal (Proxy @(2 - (2 ':% 3))) `shouldBe` (4 % 3)
+      typesShouldBeEqual @Rat @(2 - 2:%3) @(Pos 4 :% 3)
     it "correctly subtracts a rational with a negative integer" $
-      ratVal (Proxy @((2 ':% 3) - (Neg 2))) `shouldBe` (8 % 3)
+      typesShouldBeEqual @Rat @(2:%3 - Neg 2) @(Pos 8 :% 3)
     it "correctly subtracts a negative integer with a rational" $
-      ratVal (Proxy @((Neg 2) - (2 ':% 3))) `shouldBe` ((-8) % 3)
+      typesShouldBeEqual @Rat @(Neg 2 - 2:%3) @(Neg 8 :% 3)
     it "correctly subtracts a rational with a positive integer" $
-      ratVal (Proxy @((2 ':% 3) - (Pos 2))) `shouldBe` (-4) % 3
+      typesShouldBeEqual @Rat @(2:%3 - Pos 2) @(Neg 4 :% 3)
     it "correctly subtracts a positive integer with a rational" $
-      ratVal (Proxy @((Pos 2) - (2 ':% 3))) `shouldBe` 4 % 3
+      typesShouldBeEqual @Rat @(Pos 2 - 2:%3) @(Pos 4 :% 3)
+    it "correctly simplifies the result of subtracting two rationals" $
+      typesShouldBeEqual @Rat @(4:%9 - 1:%9) @(Pos 1:%3)
 
 multiplicationTests :: Spec
 multiplicationTests =
   describe "multiplication" $ do
     it "correctly multiplies two natural numbers" $
-      ratVal (Proxy @(3 * 5)) `shouldBe` 15
+      typesShouldBeEqual @Nat @(3 * 5) @15
     it "correctly multiplies a negative integer and a natural" $
-      ratVal (Proxy @((Neg 4) * 3)) `shouldBe` (-12)
+      typesShouldBeEqual @TInt @(Neg 4 * 3) @(Neg 12)
     it "correctly multiplies a natural and a negative integer" $
-      ratVal (Proxy @(7 * (Neg 8))) `shouldBe` (-56)
+      typesShouldBeEqual @TInt @(7 * Neg 8) @(Neg 56)
     it "correctly multiplies two negative integers" $
-      ratVal (Proxy @((Neg 5) * (Neg 6))) `shouldBe` 30
+      typesShouldBeEqual @TInt @(Neg 5 * Neg 6) @(Pos 30)
     it "correctly multiplies two positive integers" $
-      ratVal (Proxy @((Pos 5) * (Pos 6))) `shouldBe` 30
+      typesShouldBeEqual @TInt @(Pos 5 * Pos 6) @(Pos 30)
     it "correctly multiplies a negative integer and a positive integer" $
-      ratVal (Proxy @((Neg 4) * (Pos 3))) `shouldBe` (-12)
+      typesShouldBeEqual @TInt @(Neg 4 * Pos 3) @(Neg 12)
     it "correctly multiplies a positive integer and a negative integer" $
-      ratVal (Proxy @((Pos 7) * (Neg 8))) `shouldBe` (-56)
+      typesShouldBeEqual @TInt @(Pos 7 * Neg 8) @(Neg 56)
     it "correctly multiplies two rationals" $
-      ratVal (Proxy @((2 ':% 3) * (5 ':% 7))) `shouldBe` (10 % 21)
+      typesShouldBeEqual @Rat @(2:%3 * 5:%7) @(Pos 10 :% 21)
     it "correctly multiplies a rational with a natural" $
-      ratVal (Proxy @((2 ':% 3) * 2)) `shouldBe` (4 % 3)
+      typesShouldBeEqual @Rat @(2:%3 * 2) @(Pos 4 :% 3)
     it "correctly multiplies a natural with a rational" $
-      ratVal (Proxy @(2 * (2 ':% 3))) `shouldBe` (4 % 3)
+      typesShouldBeEqual @Rat @(2 * 2:%3) @(Pos 4 :% 3)
     it "correctly multiplies a rational with a negative integer" $
-      ratVal (Proxy @((2 ':% 3) * (Neg 2))) `shouldBe` ((-4) % 3)
+      typesShouldBeEqual @Rat @(2:%3 * Neg 2) @(Neg 4 :% 3)
     it "correctly multiplies a negative integer with a rational" $
-      ratVal (Proxy @((Neg 2) * (2 ':% 3))) `shouldBe` ((-4) % 3)
+      typesShouldBeEqual @Rat @(Neg 2 * 2:%3) @(Neg 4 :% 3)
     it "correctly multiplies a rational with a positive integer" $
-      ratVal (Proxy @((2 ':% 3) * (Pos 2))) `shouldBe` 4 % 3
+      typesShouldBeEqual @Rat @(2:%3 * Pos 2) @(Pos 4 :% 3)
     it "correctly multiplies a positive integer with a rational" $
-      ratVal (Proxy @((Pos 2) * (2 ':% 3))) `shouldBe` 4 % 3
+      typesShouldBeEqual @Rat @(Pos 2 * 2:%3) @(Pos 4 :% 3)
+    it "correctly simplifies the result of multiplying two rationals" $
+      typesShouldBeEqual @Rat @(2:%3 * 3:%5) @(Pos 2 :% 5)
 
 absTests :: Spec
 absTests = do
   describe "abs" $ do
     it "Acts as a no-op on a natural" $
-      natVal (Proxy @(Abs 3)) `shouldBe` 3
+      typesShouldBeEqual @Nat @(Abs 3) @3
     it "Acts as a no-op on a positive int" $
-      intVal (Proxy @(Abs (Pos 3))) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Abs (Pos 3)) @(Pos 3)
     it "Negates a negative int" $
-      intVal (Proxy @(Abs (Neg 3))) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Abs (Neg 3)) @(Pos 3)
+    it "Normalises a positive rational with natural numerator" $
+      typesShouldBeEqual @Rat @(Abs (2:%3)) @(Pos 2 :% 3)
+    it "Normalises a positive rational with signed positive numerator" $
+      typesShouldBeEqual @Rat @(Abs (Pos 4 :% 6)) @(Pos 2 :% 3)
+    it "Negates a negative rational" $
+      typesShouldBeEqual @Rat @(Abs (Neg 2 :% 3)) @(Pos 2 :% 3)
 
 negateTests :: Spec
 negateTests = do
   describe "negate" $ do
+    it "Turns a natural into Neg" $
+      typesShouldBeEqual @TInt @(Negate 3) @(Neg 3)
     it "Turns Pos into Neg" $
-      intVal (Proxy @(Negate (Pos 3))) `shouldBe` (-3)
+      typesShouldBeEqual @TInt @(Negate (Pos 3)) @(Neg 3)
     it "Turns Neg into Pos" $
-      intVal (Proxy @(Negate (Neg 3))) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Negate (Neg 3)) @(Pos 3)
+    it "Negates a rational with natural numerator" $
+      typesShouldBeEqual @Rat @(Negate (3 :% 4)) @(Neg 3 :% 4)
+    it "Negates a rational with positive numerator" $
+      typesShouldBeEqual @Rat @(Negate (Pos 4 :% 5)) @(Neg 4 :% 5)
+    it "Negates a rational with negative numerator" $
+      typesShouldBeEqual @Rat @(Negate (Neg 5 :% 4)) @(Pos 5 :% 4)
 
 recipTests :: Spec
 recipTests = do
   describe "recip" $ do
     it "Inverts Nat / Nat" $
-      ratVal (Proxy @(Recip (3 :% 2))) `shouldBe` (2 % 3)
+      typesShouldBeEqual @Rat @(Recip (3 :% 2)) @(Pos 2 :% 3)
     it "Inverts Pos / Nat" $
-      ratVal (Proxy @(Recip ((Pos 3) :% 2))) `shouldBe` (2 % 3)
+      typesShouldBeEqual @Rat @(Recip (Pos 3 :% 2)) @(Pos 2 :% 3)
     it "Inverts Neg / Nat" $
-      ratVal (Proxy @(Recip ((Neg 3) :% 2))) `shouldBe` ((-2) % 3)
+      typesShouldBeEqual @Rat @(Recip (Neg 3 :% 2)) @(Neg 2 :% 3)
+    it "Inverts Nat" $
+      typesShouldBeEqual @Rat @(Recip 5) @(Pos 1 :% 5)
+    it "Inverts a positive TInt" $
+      typesShouldBeEqual @Rat @(Recip (Pos 4)) @(Pos 1 :% 4)
+    it "Inverts a negative TInt" $
+      typesShouldBeEqual @Rat @(Recip (Neg 3)) @(Neg 1 :% 3)
 
 divisionTests :: Spec
 divisionTests = do
@@ -317,7 +345,7 @@ expTests = do
     it "calculates x^(+0) for natural x" $
       ratVal (Proxy @(3^(Pos 0))) `shouldBe` 1 % 1
     it "calculates x^(-0) for natural x" $
-      ratVal (Proxy @(3^(Neg 0))) `shouldBe` 1 % 1
+      typesShouldBeEqual @Rat @(3^(Neg 0)) @(1 ':% 1)
     it "calculates x^0 for integer x" $
       intVal (Proxy @((Pos 3)^0)) `shouldBe` 1
     it "calculates x^(+0) for integer x" $

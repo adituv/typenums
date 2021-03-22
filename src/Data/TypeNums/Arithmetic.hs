@@ -45,6 +45,9 @@ infixl 7 *
 type (+) a b = Add a b
 
 -- | The difference of two type-level numbers
+--
+--   For the difference of two naturals @a@ and @b@, @a-b@ is also a natural,
+--   so only exists for @a@ >= @b@.
 type (-) a b = Sub a b
 
 -- | The product of two type-level numbers.

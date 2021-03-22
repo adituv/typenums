@@ -22,6 +22,7 @@ module Data.TypeNums.Arithmetic.Internal (
   , MulK
   , IntDivK
   , ExpK
+  , NegK
 
   -- * Unary operations
   , Abs
@@ -65,28 +66,22 @@ import qualified GHC.TypeLits as G
 --
 -- @since 0.1.2
 type family AddK k1 k2 where
+  AddK Rat  _    = Rat
+  AddK _    Rat  = Rat
   AddK Nat  Nat  = Nat
-  AddK Nat  Rat  = Rat
   AddK Nat  TInt = TInt
-  AddK Rat  Nat  = Rat
-  AddK Rat  Rat  = Rat
-  AddK Rat  TInt = Rat
   AddK TInt Nat  = TInt
-  AddK TInt Rat  = Rat
   AddK TInt TInt = TInt
 
 -- | The kind of the result of subtraction.
 --
 -- @since 0.1.2
 type family SubK k1 k2 where
+  SubK Rat  _    = Rat
+  SubK _    Rat  = Rat
   SubK Nat  Nat  = Nat
-  SubK Nat  Rat  = Rat
   SubK Nat  TInt = TInt
-  SubK Rat  Nat  = Rat
-  SubK Rat  Rat  = Rat
-  SubK Rat  TInt = Rat
   SubK TInt Nat  = TInt
-  SubK TInt Rat  = Rat
   SubK TInt TInt = TInt
 
 -- | The kind of the result of multiplication.
@@ -94,12 +89,10 @@ type family SubK k1 k2 where
 -- @since 0.1.2
 type family MulK k1 k2 where
   MulK k    k    = k
-  MulK Nat  Rat  = Rat
+  MulK Rat  _    = Rat
+  MulK _    Rat  = Rat
   MulK Nat  TInt = TInt
-  MulK Rat  Nat  = Rat
-  MulK Rat  TInt = Rat
   MulK TInt Nat  = TInt
-  MulK TInt Rat  = Rat
 
 -- | The kind of the result of division by a natural number
 --
@@ -114,6 +107,14 @@ type family ExpK k1 k2 where
   ExpK TInt Nat = TInt
   ExpK Rat Nat = Rat
   ExpK _   TInt = Rat
+
+-- | The kind of the result of negation
+--
+-- @since 0.1.4
+type family NegK k where
+  NegK Nat = TInt
+  NegK TInt = TInt
+  NegK Rat = Rat
 
 -- | The sum of two type-level numbers.
 --
@@ -139,17 +140,17 @@ type family Add (x :: k1) (y :: k2) :: AddK k1 k2 where
                                             ('Pos (x G.- y))
                                             ('Neg (y G.- x))
 
-  Add (n1 ':% d1) (n2 ':% d2) = (Add (Mul n1 d2) (Mul n2 d1))
-                                            ':% (Mul d1 d2)
-  Add (n ':% d)   (y :: Nat)  = (Add n (Mul d y)) ':% d
-  Add (n ':% d)   ('Pos y)    = (Add n (Mul d y)) ':% d
-  Add (n ':% d)   ('Neg y)    = (Add n (Mul d ('Neg y))) ':% d
-  Add (x :: Nat)  (n ':% d)   = (Add (Mul d x) n) ':% d
-  Add ('Pos x)    (n ':% d)   = (Add (Mul d x) n) ':% d
-  Add ('Neg x)    (n ':% d)   = (Add (Mul d ('Neg x)) n) ':% d
+  Add (x :: Rat) (y :: Rat) = Simplify (AddRat x y)
+  Add (x :: Rat) y          = Simplify (AddRat x (y ':% 1))
+  Add x          (y :: Rat) = Simplify (AddRat (x ':% 1) y)
+
+type family AddRat (x :: Rat) (y :: Rat) :: Rat where
+  AddRat (n1 ':% d1) (n2 ':% d2) = (Add (Mul n1 d2) (Mul n2 d1)) ':% (Mul d1 d2)
 
 -- | The difference of two type-level numbers
 --
+--   For the difference of two naturals @a@ and @b@, @a-b@ is also a natural,
+--   so only exists for @a@ >= @b@.
 -- @since 0.1.2
 type family Sub (x :: k1) (y :: k2) :: SubK k1 k2 where
   Sub (x :: Nat) (y :: Nat)  = x G.- y
@@ -164,17 +165,16 @@ type family Sub (x :: k1) (y :: k2) :: SubK k1 k2 where
   Sub (x :: Nat)  ('Pos y)  = Add x ('Neg y)
   Sub (x :: Nat)  ('Neg y)  = Add x ('Pos y)
 
+  Sub (x :: Rat) (y :: Rat) = Simplify (SubRat x y)
+  Sub (x :: Rat) y          = Simplify (SubRat x (y ':% 1))
+  Sub x          (y :: Rat) = Simplify (SubRat (x ':% 1) y)
+
+type family SubRat (x :: Rat) (y :: Rat) :: Rat where
 -- Denominators are wrapped in Pos here to force the products to evaluate
 -- as kind TInt instead of Nat.  Without this, it is possible to end up with,
 -- for example, @(14-15) :: Nat@ which does not produce a Nat and therefore
 -- causes typing to fail.
-  Sub (n1 ':% d1) (n2 ':% d2) = (Sub (Mul n1 ('Pos d2)) (Mul n2 ('Pos d1))) ':% (Mul d1 d2)
-  Sub (n ':% d)   (y :: Nat)  = Sub (n ':% d) (y ':% 1)
-  Sub (n ':% d)   ('Pos y)    = Sub (n ':% d) ('Pos y ':% 1)
-  Sub (n ':% d)   ('Neg y)    = Sub (n ':% d) ('Neg y ':% 1)
-  Sub (x :: Nat)  (n ':% d)   = Sub (x ':% 1) (n ':% d)
-  Sub ('Pos x)    (n ':% d)   = Sub ('Pos x ':% 1) (n ':% d)
-  Sub ('Neg x)    (n ':% d)   = Sub ('Neg x ':% 1) (n ':% d)
+  SubRat (n1 ':% d1) (n2 ':% d2) = (Sub (Mul n1 ('Pos d2)) (Mul n2 ('Pos d1))) ':% (Mul d1 d2)
 
 -- | The product of two type-level numbers
 --
@@ -192,21 +192,23 @@ type family Mul (x :: k1) (y :: k2) :: MulK k1 k2 where
   Mul (x :: Nat)  ('Pos y)  = 'Pos (x G.* y)
   Mul (x :: Nat)  ('Neg y)  = 'Neg (x G.* y)
 
-  Mul (n1 ':% d1) (n2 ':% d2) = (Mul n1 n2) ':% (Mul d1 d2)
-  Mul (n ':% d)   (y :: Nat)  = (Mul n y) ':% d
-  Mul (n ':% d)   ('Pos y)    = (Mul n ('Pos y)) ':% d
-  Mul (n ':% d)   ('Neg y)    = (Mul n ('Neg y)) ':% d
-  Mul (x :: Nat)  (n ':% d)   = (Mul x n) ':% d
-  Mul ('Pos x)    (n ':% d)   = (Mul ('Pos x) n) ':% d
-  Mul ('Neg x)    (n ':% d)   = (Mul ('Neg x) n) ':% d
+  Mul (x :: Rat) (y :: Rat) = Simplify (MulRat x y)
+  Mul (x :: Rat) y          = Simplify (MulRat x (y ':% 1))
+  Mul x          (y :: Rat) = Simplify (MulRat (x ':% 1) y)
 
--- | The reciprocal of a type-level rational
+type family MulRat (x :: Rat) (y :: Rat) :: Rat where
+  Mul (n1 ':% d1) (n2 ':% d2) = (Mul n1 n2) ':% (Mul d1 d2)
+
+-- | The reciprocal of a type-level number
 --
 -- @since 0.1.4
-type family Recip (x :: Rat) :: Rat where
-  Recip (('Pos x) ':% y) = ('Pos y) ':% x
-  Recip (('Neg x) ':% y) = ('Neg y) ':% x
-  Recip ((x :: Nat) ':% y) = y ':% x
+type family Recip (x :: k) :: Rat where
+  Recip (x :: Nat) = 'Pos 1 ':% x
+  Recip ('Pos x)   = 'Pos 1 ':% x
+  Recip ('Neg x)   = 'Neg 1 ':% x
+  Recip ('Pos x ':% y) = 'Pos y ':% x
+  Recip ('Neg x ':% y) = 'Neg y ':% x
+  Recip ((x :: Nat) ':% y) = 'Pos y ':% x
 
 -- | The result of dividing two type-level numbers.
 --
@@ -225,11 +227,13 @@ type family RatDiv (x :: k1) (y :: k2) :: Rat where
 -- | The result of negating a 'TInt'
 --
 -- @since 0.1.4
-type family Negate (x :: TInt) :: TInt where
+type family Negate (x :: k) :: NegK k where
+  Negate (x :: Nat) = Negate ('Pos x)
   Negate ('Pos 0) = 'Pos 0
   Negate ('Neg 0) = 'Pos 0
   Negate ('Pos x) = 'Neg x
   Negate ('Neg x) = 'Pos x
+  Negate (x ':% y) = (Negate x) ':% y
 
 -- | The quotient and remainder of a type-level integer and a natural number.
 --   For a negative dividend, the remainder part is positive such that
@@ -312,7 +316,7 @@ type family Abs (x :: k) :: k where
   Abs (x :: Nat) = x
   Abs ('Pos x) = 'Pos x
   Abs ('Neg x) = 'Pos x
-  Abs (x ':% y) = Abs x ':% y
+  Abs (x ':% y) = Simplify (Abs x ':% y)
 
 -- | The greatest common divisor of two type-level integers
 --
