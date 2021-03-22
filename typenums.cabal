@@ -52,6 +52,7 @@ test-suite typenums-tests
   other-modules:
       Data.TypeNums.ArithmeticSpec
       Data.TypeNums.ComparisonSpec
+      Data.TypeNums.EqualitySpec
       Data.TypeNums.IntsSpec
       Data.TypeNums.RatsSpec
       Paths_typenums
