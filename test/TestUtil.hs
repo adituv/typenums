@@ -23,7 +23,8 @@ instance DemoteBool 'True where
 instance DemoteBool 'False where
   demote = False
 
-typesShouldBeEqual :: forall k (a :: k) (b :: k). (Typeable k, Typeable a, Typeable b) => Expectation
+-- HasCallStack constraint is required to have the location reported as the callsite rather than here
+typesShouldBeEqual :: forall k (a :: k) (b :: k). (Typeable k, Typeable a, Typeable b, HasCallStack) => Expectation
 typesShouldBeEqual = unless (isJust $ eqTypeRep typeOfA typeOfB) (expectationFailure typesUnequalMessage)
   where
     typeOfA = typeRep @a

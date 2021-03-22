@@ -40,7 +40,8 @@ module Data.TypeNums.Arithmetic
 import Data.TypeNums.Arithmetic.Internal
 
 infixl 6 +, -
-infixl 7 *
+infixl 7 *, /
+infixr 8 ^
 
 -- | The sum of two type-level numbers
 type (+) a b = Add a b

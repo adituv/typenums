@@ -215,14 +215,16 @@ type family Recip (x :: k) :: Rat where
 --
 -- @since 0.1.4
 type family RatDiv (x :: k1) (y :: k2) :: Rat where
-  RatDiv (x :: Nat) (y :: Nat) = x ':% y
-  RatDiv (x :: TInt) (y :: Nat) = x ':% y
-  RatDiv (x :: Nat) ('Pos y) = ('Pos x) ':% y
-  RatDiv (x :: Nat) ('Neg y) = ('Neg x) ':% y
-  RatDiv (x :: TInt) ('Neg y) = (Negate x) ':% y
-  RatDiv (x :: TInt) ('Pos y) = x ':% y
+  RatDiv (x :: Nat) (y :: Nat) = Simplify (x ':% y)
+  RatDiv (x :: TInt) (y :: Nat) = Simplify (x ':% y)
+  RatDiv (x :: Nat) ('Pos y) = Simplify (x ':% y)
+  RatDiv (x :: Nat) ('Neg y) = Simplify (('Neg x) ':% y)
+  RatDiv (x :: TInt) ('Neg y) = Simplify ((Negate x) ':% y)
+  RatDiv (x :: TInt) ('Pos y) = Simplify (x ':% y)
+
+  -- Cases with Mul don't need "Simplify" as Mul already simplifies
   RatDiv (x :: Rat) (y :: Rat) = Mul x (Recip y)
-  RatDiv x (y :: Rat) = Mul (RatDiv x 1) (Recip y)
+  RatDiv x (y :: Rat) = Mul x (Recip y)
   RatDiv (x :: Rat) y = Mul x (RatDiv 1 y)
 
 -- | The result of negating a 'TInt'
@@ -235,6 +237,9 @@ type family Negate (x :: k) :: NegK k where
   Negate ('Pos x) = 'Neg x
   Negate ('Neg x) = 'Pos x
   Negate (x ':% y) = (Negate x) ':% y
+
+
+infixl 7 `Div`, `Mod`, `Quot`, `Rem`
 
 -- | The quotient and remainder of a type-level integer and a natural number.
 --   For a negative dividend, the remainder part is positive such that
@@ -353,13 +358,14 @@ type family Simplify (x :: Rat) :: Rat where
 --
 -- @since 0.1.4
 type family Exp (x :: k1) (y :: k2) :: ExpK k1 k2 where
-  Exp (x :: Nat)  (y :: Nat) = ExpAux 1 x y
-  Exp (x :: TInt) (y :: Nat) = ExpAux ('Pos 1) x y
-  Exp (x :: Rat)  (y :: Nat) = ExpAux (1 ':% 1) x y
-  Exp (x :: Rat)  ('Pos y)   = ExpAux (1 ':% 1) x y
-  Exp (x :: Rat)  ('Neg y)   = Recip (ExpAux (1 ':% 1) x y)
-  Exp x           ('Pos y)   = ExpAux (1 ':% 1) (x ':% 1) y
-  Exp x           ('Neg y)   = Recip (ExpAux (1 ':% 1) (x ':% 1) y)
+  Exp (x :: Nat)  (y :: Nat) = x G.^ y
+  Exp ('Pos x)    (y :: Nat) = 'Pos (x G.^ y)
+  Exp ('Neg x)    (y :: Nat) = ExpAux ('Pos 1) ('Neg x) y
+  Exp (x :: Rat)  (y :: Nat) = Simplify (ExpAux (1 ':% 1) x y)
+  Exp (x :: Rat)  ('Pos y)   = Simplify (ExpAux (1 ':% 1) x y)
+  Exp (x :: Rat)  ('Neg y)   = Simplify (Recip (ExpAux (1 ':% 1) x y))
+  Exp x           ('Pos y)   = Simplify (ExpAux (1 ':% 1) (x ':% 1) y)
+  Exp x           ('Neg y)   = Simplify (Recip (ExpAux (1 ':% 1) (x ':% 1) y))
 
 type family ExpAux (acc :: k1) (x :: k1) (y :: Nat) :: k1 where
   ExpAux acc _ 0 = acc
@@ -419,8 +425,15 @@ type family IntLogAux (n :: Nat) (x :: TInt) :: TInt where
   IntLogAux n ('Pos 1) = 'Pos 0
   IntLogAux n ('Pos x) = Add 1 (IntLogAux n (Div ('Pos x) n))
 
--- There's an off-by-one error for 0 < r < 1 when r is not exactly b^(-n)
--- Just get it working
+-- For rationals x/y >= 1, 
+-- IntLog(x/y) = IntLog(Floor(x/y))
+--
+-- For rationals x/y < 1, consider the reciprocal y/x
+-- IntLog(x/y) = Floor(Log(x/y)) = -Ceiling(Log(y/x)) = -Ceiling(Log(Floor(y/x)))
+--
+-- To convert IntLog(..) into Ceiling(Log(..)), we use "NegLogFudge"
+
+-- Convert the implicit floor in IntLog(y/x) into a ceiling
 type family NegLogFudge (n :: Nat) (x :: Rat) (lg :: TInt) where
   NegLogFudge n x lg =
     If (Simplify (Exp n lg) DTE.== Simplify x)

@@ -15,9 +15,6 @@ module Data.TypeNums.ArithmeticSpec where
 import Data.TypeNums
 import Test.Hspec(Spec, describe, it, shouldBe)
 
-import Data.Proxy(Proxy(..))
-import Data.Ratio((%))
-import GHC.Exts(Proxy#, proxy#)
 import TestUtil(typesShouldBeEqual)
 
 spec :: Spec
@@ -193,254 +190,244 @@ divisionTests :: Spec
 divisionTests = do
   describe "ratdiv" $ do
     it "Divides two naturals" $
-      ratVal (Proxy @(3 / 2)) `shouldBe` (3 % 2)
+      typesShouldBeEqual @Rat @(3 / 2) @(Pos 3 :% 2)
     it "Divides a positive integer by a natural" $
-      ratVal (Proxy @((Pos 3) / 2)) `shouldBe` (3 % 2)
+      typesShouldBeEqual @Rat @(Pos 3 / 2) @(Pos 3 :% 2)
     it "Divides a negative integer by a natural" $
-      ratVal (Proxy @((Neg 3) / 2)) `shouldBe` ((-3) % 2)
+      typesShouldBeEqual @Rat @(Neg 3 / 2) @(Neg 3 :% 2)
     it "Divides a natural by a positive integer" $
-      ratVal (Proxy @(3 / (Pos 2))) `shouldBe` (3 % 2)
+      typesShouldBeEqual @Rat @(3 / Pos 2) @(Pos 3 :% 2)
     it "Divides a natural by a negative integer" $
-      ratVal (Proxy @(3 / (Neg 2))) `shouldBe` ((-3) % 2)
+      typesShouldBeEqual @Rat @(3 / Neg 2) @(Neg 3 :% 2)
     it "Divides a positive integer by a negative integer" $
-      ratVal (Proxy @((Pos 3) / (Neg 2))) `shouldBe` ((-3) % 2)
+      typesShouldBeEqual @Rat @(Pos 3 / Neg 2) @(Neg 3 :% 2)
     it "Divides a negative integer by a positive integer" $
-      ratVal (Proxy @((Neg 3) / (Pos 2))) `shouldBe` ((-3) % 2)
+      typesShouldBeEqual @Rat @(Neg 3 / Pos 2) @(Neg 3 :% 2)
     it "Divides a negative integer by a negative integer" $
-      ratVal (Proxy @((Neg 3) / (Neg 2))) `shouldBe` (3 % 2)
+      typesShouldBeEqual @Rat @(Neg 3 / Neg 2) @(Pos 3 :% 2)
     it "Divides a natural by a rational" $
-      ratVal (Proxy @(5 / (2 :% 3))) `shouldBe` (15 % 2)
+      typesShouldBeEqual @Rat @(5 / (2:%3)) @(Pos 15 :% 2)
     it "Divides a positive integer by a rational" $
-      ratVal (Proxy @((Pos 5) / (2 :% 3))) `shouldBe` (15 % 2)
+      typesShouldBeEqual @Rat @(Pos 5 / 2:%3) @(Pos 15 :% 2)
     it "Divides a negative integer by a rational" $
-      ratVal (Proxy @((Neg 5) / (2 :% 3))) `shouldBe` ((-15) % 2)
+      typesShouldBeEqual @Rat @(Neg 5 / 2:%3) @(Neg 15 :% 2)
     it "Divides a negative integer by a negative rational" $
-      ratVal (Proxy @((Neg 5) / ((Neg 2) :% 3))) `shouldBe` (15 % 2)
+      typesShouldBeEqual @Rat @(Neg 5 / (Neg 2:% 3)) @(Pos 15 :% 2)
     it "Divides a rational by a natural" $
-      ratVal (Proxy @((2 :% 3) / 5)) `shouldBe` (2 % 15)
+      typesShouldBeEqual @Rat @(2:%3 / 5) @(Pos 2 :% 15)
     it "Divides a rational by a positive integer" $
-      ratVal (Proxy @((2 :% 3) / (Pos 5))) `shouldBe` (2 % 15)
+      typesShouldBeEqual @Rat @(2:%3 / Pos 5) @(Pos 2 :% 15)
     it "Divides a rational by a negative integer" $
-      ratVal (Proxy @((2 :% 3) / (Neg 5))) `shouldBe` ((-2) % 15)
+      typesShouldBeEqual @Rat @(2:%3 / Neg 5) @(Neg 2 :% 15)
     it "Divides a negative rational by a negative integer" $
-      ratVal (Proxy @(((Neg 2) :% 3) / (Neg 5))) `shouldBe` (2 % 15)
+      typesShouldBeEqual @Rat @((Neg 2 :% 3) / Neg 5) @(Pos 2 :% 15)
     it "Divides a rational by a rational" $
-      ratVal (Proxy @((2 :% 3) / (5 :% 7))) `shouldBe` (14 % 15)
-
-class IntPair (p :: (k1, k2)) where
-  getIntVals :: Proxy p -> (Integer, Integer)
-
-instance forall a b. (KnownInt a, KnownInt b) => IntPair '(a, b) where
-  getIntVals _ = (intVal (Proxy @a), intVal (Proxy @b))
+      typesShouldBeEqual @Rat @(2:%3 / 5:%7) @(Pos 14 :% 15)
+    it "Simplifies the result of division" $
+      typesShouldBeEqual @Rat @(6 / 4) @(Pos 3 :% 2)
 
 divModTests :: Spec
 divModTests = do
   describe "divMod" $ do
     it "calculates divMod for two naturals" $
-      getIntVals (Proxy @(DivMod 29 5)) `shouldBe` (29 `divMod` 5)
+      typesShouldBeEqual @(Nat,Nat) @(DivMod 29 5) @'(5,4)
     it "calculates divMod for a positive integer and a natural" $
-      getIntVals (Proxy @(DivMod (Pos 29) 5)) `shouldBe` (29 `divMod` 5)
+      typesShouldBeEqual @(TInt,TInt) @(DivMod (Pos 29) 5) @'(Pos 5, Pos 4)
     it "calculates divMod for a negative integer and a natural" $
-      getIntVals (Proxy @(DivMod (Neg 29) 5)) `shouldBe` ((-29) `divMod` 5)
+      typesShouldBeEqual @(TInt,TInt) @(DivMod (Neg 29) 5) @'(Neg 6, Pos 1)
     it "calculates divMod for a negative integer and 1" $
-      getIntVals (Proxy @(DivMod (Neg 3) 1)) `shouldBe` ((-3) `divMod` 1)
+      typesShouldBeEqual @(TInt, TInt) @(DivMod (Neg 3) 1) @'(Neg 3, Pos 0)
   describe "div" $ do
     it "calculates div for two naturals" $
-      intVal (Proxy @(Div 29 5)) `shouldBe` (29 `div` 5)
+      typesShouldBeEqual @Nat @(Div 29 5) @5
     it "calculates div for a positive integer and a natural" $
-      intVal (Proxy @(Div (Pos 29) 5)) `shouldBe` (29 `div` 5)
+      typesShouldBeEqual @TInt @(Div (Pos 29) 5) @(Pos 5)
     it "calculates div for a negative integer and a natural" $
-      intVal (Proxy @(Div (Neg 29) 5)) `shouldBe` ((-29) `div` 5)
+      typesShouldBeEqual @TInt @(Div (Neg 29) 5) @(Neg 6)
     it "divides a negative number by 1" $
-      intVal (Proxy @(Div (Neg 3) 1)) `shouldBe` (-3)
+      typesShouldBeEqual @TInt @(Div (Neg 3) 1) @(Neg 3)
   describe "mod" $ do
     it "calculates mod for two naturals" $
-      intVal (Proxy @(Mod 29 5)) `shouldBe` (29 `mod` 5)
+      typesShouldBeEqual @Nat @(Mod 29 5) @4
     it "calculates mod for a positive integer and a natural" $
-      intVal (Proxy @(Mod (Pos 29) 5)) `shouldBe` (29 `mod` 5)
+      typesShouldBeEqual @TInt @(Mod (Pos 29) 5) @(Pos 4)
     it "calculates mod for a negative integer and a natural" $
-      intVal (Proxy @(Mod (Neg 29) 5)) `shouldBe` ((-29) `mod` 5)
+      typesShouldBeEqual @TInt @(Mod (Neg 29) 5) @(Pos 1)
     it "calculates mod for a negative integer and 1" $
-      intVal (Proxy @(Mod (Neg 3) 1)) `shouldBe` 0
+      typesShouldBeEqual @TInt @(Mod (Neg 3) 1) @(Pos 0)
 
 quotRemTests :: Spec
 quotRemTests = do
   describe "quotRem" $ do
     it "calculates quotRem for two naturals" $
-      getIntVals (Proxy @(QuotRem 29 5)) `shouldBe` (29 `quotRem` 5)
+      typesShouldBeEqual @(Nat,Nat) @(QuotRem 29 5) @'(5,4)
     it "calculates quotRem for a positive integer and a natural" $
-      getIntVals (Proxy @(QuotRem (Pos 29) 5)) `shouldBe` (29 `quotRem` 5)
+      typesShouldBeEqual @(TInt,TInt) @(QuotRem (Pos 29) 5) @'(Pos 5, Pos 4)
     it "calculates quotRem for a negative integer and a natural" $
-      getIntVals (Proxy @(QuotRem (Neg 29) 5)) `shouldBe` ((-29) `quotRem` 5)
+      typesShouldBeEqual @(TInt,TInt) @(QuotRem (Neg 29) 5) @'(Neg 5, Neg 4)
     it "calculates quotRem for a negative integer and 1" $
-      getIntVals (Proxy @(QuotRem (Neg 3) 1)) `shouldBe` ((-3) `quotRem` 1)
+      typesShouldBeEqual @(TInt,TInt) @(QuotRem (Neg 3) 1) @'(Neg 3, Pos 0)
   describe "quot" $ do
     it "calculates quot for two naturals" $
-      intVal (Proxy @(Quot 29 5)) `shouldBe` (29 `quot` 5)
+      typesShouldBeEqual @Nat @(Quot 29 5) @5
     it "calculates quot for a positive integer and a natural" $
-      intVal (Proxy @(Quot (Pos 29) 5)) `shouldBe` (29 `quot` 5)
+      typesShouldBeEqual @TInt @(Quot (Pos 29) 5) @(Pos 5)
     it "calculates quot for a negative integer and a natural" $
-      intVal (Proxy @(Quot (Neg 29) 5)) `shouldBe` ((-29) `quot` 5)
+      typesShouldBeEqual @TInt @(Quot (Neg 29) 5) @(Neg 5)
     it "calculates quotRem for a negative integer and 1" $
-      intVal (Proxy @(Quot (Neg 3) 1)) `shouldBe` (-3)
+      typesShouldBeEqual @TInt @(Quot (Neg 3) 1) @(Neg 3)
   describe "rem" $ do
     it "calculates rem for two naturals" $
-      intVal (Proxy @(Rem 29 5)) `shouldBe` (29 `rem` 5)
+      typesShouldBeEqual @Nat @(Rem 29 5) @4
     it "calculates rem for a positive integer and a natural" $
-      intVal (Proxy @(Rem (Pos 29) 5)) `shouldBe` (29 `rem` 5)
+      typesShouldBeEqual @TInt @(Rem (Pos 29) 5) @(Pos 4)
     it "calculates rem for a negative integer and a natural" $
-      intVal (Proxy @(Rem (Neg 29) 5)) `shouldBe` ((-29) `rem` 5)
+      typesShouldBeEqual @TInt @(Rem (Neg 29) 5) @(Neg 4)
     it "calculates rem for a negative integer and 1" $
-      intVal (Proxy @(Rem (Neg 3) 1)) `shouldBe` 0
+      typesShouldBeEqual @TInt @(Rem (Neg 3) 1) @(Pos 0)
 
 gcdTests :: Spec
 gcdTests = do
   describe "gcd" $ do
     it "calculates gcd for two naturals" $
-      intVal (Proxy @(GCD 50 40)) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD 50 40) @10
     it "calculates gcd for a positive int and a natural" $
-      intVal (Proxy @(GCD (Pos 50) 40)) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD (Pos 50) 40) @10
     it "calculates gcd for a natural and a positive int" $
-      intVal (Proxy @(GCD 50 (Pos 40))) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD 50 (Pos 40)) @10
     it "calculates gcd for a negative int and a natural" $
-      intVal (Proxy @(GCD (Neg 50) 40)) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD (Neg 50) 40) @10
     it "calculates gcd for a natural and a negative int" $
-      intVal (Proxy @(GCD 50 (Neg 40))) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD 50 (Neg 40)) @10
     it "calculates gcd for two positive integers" $
-      intVal (Proxy @(GCD (Pos 50) (Pos 40))) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD (Pos 50) (Pos 40)) @10
     it "calculates gcd for a positive and a negative int" $
-      intVal (Proxy @(GCD (Pos 50) (Neg 40))) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD (Pos 50) (Neg 40)) @10
     it "calculates gcd for a negative and a positive int" $
-      intVal (Proxy @(GCD (Neg 50) (Pos 40))) `shouldBe` 10
+      typesShouldBeEqual @Nat @(GCD (Neg 50) (Pos 40)) @10
     it "calculates gcd for two negative integers" $
-      intVal (Proxy @(GCD (Neg 50) (Neg 40))) `shouldBe` 10
-
-class RawRational (r :: Rat) where
-  rawRatVals :: Proxy r -> (Integer, Integer)
-
-instance forall n d. (KnownInt n, KnownNat d) => RawRational (n ':% d) where
-  rawRatVals _ = (intVal (Proxy @n), natVal (Proxy @d))
+      typesShouldBeEqual @Nat @(GCD (Neg 50) (Neg 40)) @10
 
 simplifyTests :: Spec
 simplifyTests = do
   describe "simplify" $ do
     it "acts as a no-op for an already-simplified fraction" $
-      rawRatVals (Proxy @(Simplify (2 :% 3))) `shouldBe` (2, 3)
+      typesShouldBeEqual @Rat @(Simplify (2 :% 3)) @(Pos 2 :% 3)
     it "reduces an unreduced fraction" $
-      rawRatVals (Proxy @(Simplify (4 :% 6))) `shouldBe` (2, 3)
-    it "no-ops for an already-simplified (int,int) fraction" $
-      rawRatVals (Proxy @(Simplify ((Pos 2) :% 3))) `shouldBe` (2, 3)
-    it "no-opts for an already-simplified (neg,int) fraction" $
-      rawRatVals (Proxy @(Simplify ((Neg 2) :% 3))) `shouldBe` ((-2), 3)
-    it "reduces an (int,int) unreduced fraction" $
-      rawRatVals (Proxy @(Simplify ((Pos 4) :% 6))) `shouldBe` (2, 3)
+      typesShouldBeEqual @Rat @(Simplify (4 :% 6)) @(Pos 2 :% 3)
+    it "no-ops for an already-simplified positive TInt fraction" $
+      typesShouldBeEqual @Rat @(Pos 2 :% 3) @(Pos 2 :% 3)
+    it "no-opts for an already-simplified negative TInt fraction" $
+      typesShouldBeEqual @Rat @(Simplify (Neg 2 :% 3)) @(Neg 2 :% 3)
+    it "reduces a positive TInt unreduced fraction" $
+      typesShouldBeEqual @Rat @(Simplify (Pos 4 :% 6)) @(Pos 2 :% 3)
     it "reduces a (neg, int) unreduced fraction" $
-      rawRatVals (Proxy @(Simplify ((Neg 4) :% 6))) `shouldBe` ((-2), 3)
+      typesShouldBeEqual @Rat @(Simplify (Neg 4 :% 6)) @(Neg 2 :% 3)
 
 expTests :: Spec
 expTests = do
   describe "exp" $ do
     it "calculates x^0 for natural x" $
-      natVal (Proxy @(3^0)) `shouldBe` 1
+      typesShouldBeEqual @Nat @(3^0) @1
     it "calculates x^(+0) for natural x" $
-      ratVal (Proxy @(3^(Pos 0))) `shouldBe` 1 % 1
+      typesShouldBeEqual @Rat @(3^Pos 0) @(Pos 1 :% 1)
     it "calculates x^(-0) for natural x" $
-      typesShouldBeEqual @Rat @(3^(Neg 0)) @(1 ':% 1)
+      typesShouldBeEqual @Rat @(3^Neg 0) @(Pos 1 :% 1)
     it "calculates x^0 for integer x" $
-      intVal (Proxy @((Pos 3)^0)) `shouldBe` 1
+      typesShouldBeEqual @TInt @(Pos 3 ^ 0) @(Pos 1)
     it "calculates x^(+0) for integer x" $
-      ratVal (Proxy @((Pos 3)^(Pos 0))) `shouldBe` 1 % 1
-    it "calculates x^(-0) for integer x" $
-      ratVal (Proxy @((Pos 3)^(Neg 0))) `shouldBe` 1 % 1
+      typesShouldBeEqual @Rat @(Pos 3 ^ Pos 0) @(Pos 1 :% 1)
+    it "calculates x^(Neg 0) for integer x" $
+      typesShouldBeEqual @Rat @(Pos 3 ^ Neg 0) @(Pos 1 :% 1)
     it "calculates x^0 for rational x" $
-      ratVal (Proxy @((3 :% 5)^0)) `shouldBe` 1
+      typesShouldBeEqual @Rat @(3:%5 ^ 0) @(Pos 1 :% 1)
     it "calculates x^(+0) for rational x" $
-      ratVal (Proxy @((3 :% 5)^(Pos 0))) `shouldBe` 1 % 1
-    it "calculates x^(-0) for rational x" $
-      ratVal (Proxy @((3 :% 5)^(Neg 0))) `shouldBe` 1 % 1
+      typesShouldBeEqual @Rat @(3:%5 ^ Pos 0) @(Pos 1 :% 1)
+    it "calculates x^(Neg 0) for rational x" $
+      typesShouldBeEqual @Rat @(3:%5 ^ Neg 0) @(Pos 1 :% 1)
     it "calculates x^y for natural x,y" $
-      natVal (Proxy @(5^3)) `shouldBe` 125
+      typesShouldBeEqual @Nat @(5^3) @125
     it "calculates (+x)^y for natural y" $
-      intVal (Proxy @((Pos 5)^3)) `shouldBe` 125
+      typesShouldBeEqual @TInt @(Pos 5 ^ 3) @(Pos 125)
 
 roundingTests :: Spec
 roundingTests = do
   describe "truncate" $ do
     it "acts as a no-op on a natural" $
-      intVal (Proxy @(Truncate 3)) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Truncate 3) @(Pos 3)
     it "acts as a no-op on a positive int" $
-      intVal (Proxy @(Truncate (Pos 3))) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Truncate (Pos 3)) @(Pos 3)
     it "acts as a no-op on a negative int" $
-      intVal (Proxy @(Truncate (Neg 3))) `shouldBe` (-3)
-    it "acts as a no-op on (x % 1) for natural x" $
-      intVal (Proxy @(Truncate (3 ':% 1))) `shouldBe` 3
-    it "acts as a no-op on (x % 1) for positive x" $
-      intVal (Proxy @(Truncate ((Pos 3) ':% 1))) `shouldBe` 3
-    it "acts as a no-op on (x % 1) for negative x" $
-      intVal (Proxy @(Truncate ((Neg 3) ':% 1))) `shouldBe` (-3)
+      typesShouldBeEqual @TInt @(Truncate (Neg 3)) @(Neg 3)
+    it "acts as a no-op on (x :% 1) for natural x" $
+      typesShouldBeEqual @TInt @(Truncate (3 :% 1)) @(Pos 3)
+    it "acts as a no-op on (x :% 1) for positive x" $
+      typesShouldBeEqual @TInt @(Truncate (Pos 3 :% 1)) @(Pos 3)
+    it "acts as a no-op on (x :% 1) for negative x" $
+      typesShouldBeEqual @TInt @(Truncate (Neg 3 :% 1)) @(Neg 3)
     it "rounds a positive rational towards 0" $
-      intVal (Proxy @(Truncate (25 ':% 3))) `shouldBe` 8
+      typesShouldBeEqual @TInt @(Truncate (25 :% 3)) @(Pos 8)
     it "rounds a negative rational towards 0" $
-      intVal (Proxy @(Truncate ((Neg 25) ':% 3))) `shouldBe` (-8)
+      typesShouldBeEqual @TInt @(Truncate (Neg 25 ':% 3)) @(Neg 8)
   describe "floor" $ do
     it "acts as a no-op on a natural" $
-      intVal (Proxy @(Floor 3)) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Floor 3) @(Pos 3)
     it "acts as a no-op on a positive int" $
-      intVal (Proxy @(Floor (Pos 3))) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Floor (Pos 3)) @(Pos 3)
     it "acts as a no-op on a negative int" $
-      intVal (Proxy @(Floor (Neg 3))) `shouldBe` (-3)
-    it "acts as a no-op on (x % 1) for natural x" $
-      intVal (Proxy @(Floor (3 ':% 1))) `shouldBe` 3
-    it "acts as a no-op on (x % 1) for positive x" $
-      intVal (Proxy @(Floor ((Pos 3) ':% 1))) `shouldBe` 3
-    it "acts as a no-op on (x % 1) for negative x" $
-      intVal (Proxy @(Floor ((Neg 3) ':% 1))) `shouldBe` (-3)
+      typesShouldBeEqual @TInt @(Floor (Neg 3)) @(Neg 3)
+    it "acts as a no-op on (x :% 1) for natural x" $
+      typesShouldBeEqual @TInt @(Floor (3 :% 1)) @(Pos 3)
+    it "acts as a no-op on (x :% 1) for positive x" $
+      typesShouldBeEqual @TInt @(Floor (Pos 3 :% 1)) @(Pos 3)
+    it "acts as a no-op on (x :% 1) for negative x" $
+      typesShouldBeEqual @TInt @(Floor (Neg 3 :% 1)) @(Neg 3)
     it "rounds a positive rational towards -inf" $
-      intVal (Proxy @(Floor (25 ':% 3))) `shouldBe` 8
+      typesShouldBeEqual @TInt @(Floor (25 ':% 3)) @(Pos 8)
     it "rounds a negative rational towards -inf" $
-      intVal (Proxy @(Floor ((Neg 25) ':% 3))) `shouldBe` (-9)
+      typesShouldBeEqual @TInt @(Floor (Neg 25 ':% 3)) @(Neg 9)
   describe "ceiling" $ do
     it "acts as a no-op on a natural" $
-      intVal (Proxy @(Ceiling 3)) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Ceiling 3) @(Pos 3)
     it "acts as a no-op on a positive int" $
-      intVal (Proxy @(Ceiling (Pos 3))) `shouldBe` 3
+      typesShouldBeEqual @TInt @(Ceiling (Pos 3)) @(Pos 3)
     it "acts as a no-op on a negative int" $
-      intVal (Proxy @(Ceiling (Neg 3))) `shouldBe` (-3)
-    it "acts as a no-op on (x % 1) for natural x" $
-      intVal (Proxy @(Ceiling (3 ':% 1))) `shouldBe` 3
-    it "acts as a no-op on (x % 1) for positive x" $
-      intVal (Proxy @(Ceiling ((Pos 3) ':% 1))) `shouldBe` 3
-    it "acts as a no-op on (x % 1) for negative x" $
-      intVal (Proxy @(Ceiling ((Neg 3) ':% 1))) `shouldBe` (-3)
+      typesShouldBeEqual @TInt @(Ceiling (Neg 3)) @(Neg 3)
+    it "acts as a no-op on (x :% 1) for natural x" $
+      typesShouldBeEqual @TInt @(Ceiling (3 ':% 1)) @(Pos 3)
+    it "acts as a no-op on (x :% 1) for positive x" $
+      typesShouldBeEqual @TInt @(Ceiling (Pos 3 ':% 1)) @(Pos 3)
+    it "acts as a no-op on (x :% 1) for negative x" $
+      typesShouldBeEqual @TInt @(Ceiling (Neg 3 ':% 1)) @(Neg 3)
     it "rounds a positive rational towards +inf" $
-      intVal (Proxy @(Ceiling (25 ':% 3))) `shouldBe` 9
+      typesShouldBeEqual @TInt @(Ceiling (25 ':% 3)) @(Pos 9)
     it "rounds a negative rational towards +inf" $
-      intVal (Proxy @(Ceiling ((Neg 25) ':% 3))) `shouldBe` (-8)
+      typesShouldBeEqual @TInt @(Ceiling (Neg 25 ':% 3)) @(Neg 8)
 
 logTests :: Spec
 logTests = do
   describe "intlog" $ do
     it "calculates log_2(8)" $
-      intVal (Proxy @(IntLog 2 8)) `shouldBe` 3
+      typesShouldBeEqual @TInt @(IntLog 2 8) @(Pos 3)
     it "calculates log_2(3)" $
-      intVal (Proxy @(IntLog 2 3)) `shouldBe` 1
+      typesShouldBeEqual @TInt @(IntLog 2 3) @(Pos 1)
     it "calculates log_3(8)" $
-      intVal (Proxy @(IntLog 3 8)) `shouldBe` 1
+      typesShouldBeEqual @TInt @(IntLog 3 8) @(Pos 1)
     it "calculates log_3(9)" $
-      intVal (Proxy @(IntLog 3 9)) `shouldBe` 2
+      typesShouldBeEqual @TInt @(IntLog 3 9) @(Pos 2)
     it "calcuclates log_3(2)" $
-      intVal (Proxy @(IntLog 3 2)) `shouldBe` 0
+      typesShouldBeEqual @TInt @(IntLog 3 2) @(Pos 0)
     it "calculates log_2(1/2)" $
-      intVal (Proxy @(IntLog 2 (1 ':% 2))) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(IntLog 2 (1 :% 2)) @(Neg 1)
     it "calculates log_2(2/3)" $
-      intVal (Proxy @(IntLog 2 (2 ':% 3))) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(IntLog 2 (2 :% 3)) @(Neg 1)
     it "calculates log_2(1/3)" $
-      intVal (Proxy @(IntLog 2 (1 ':% 3))) `shouldBe` (-2)
+      typesShouldBeEqual @TInt @(IntLog 2 (1 :% 3)) @(Neg 2)
     it "calculates log_3(1/27)" $
-      intVal (Proxy @(IntLog 3 (1 ':% 27))) `shouldBe` (-3)
+      typesShouldBeEqual @TInt @(IntLog 3 (1 :% 27)) @(Neg 3)
     it "calculates log_3(1/2)" $
-      intVal (Proxy @(IntLog 3 (1 ':% 2))) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(IntLog 3 (1 :% 2)) @(Neg 1)
     it "calculates log_3(3/5)" $
-      intVal (Proxy @(IntLog 3 (3 ':% 5))) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(IntLog 3 (3 :% 5)) @(Neg 1)
     it "calculates log_6(3/5)" $
-      intVal (Proxy @(IntLog 6 (3 ':% 5))) `shouldBe` (-1)
+      typesShouldBeEqual @TInt @(IntLog 6 (3 :% 5)) @(Neg 1)
