@@ -17,6 +17,9 @@ The change log is available [on GitHub][2].
   * Rounding (Floor, Ceiling, Truncate)
   * Integer logarithm
 * Rewrote arithmetic tests to compare types directly
+* Updated arithmetic operations to simplify rationals
+* (==?) now considers "logical equality" for numbers 
+  rather than exact type representational equality.
 
 0.1.3
 =====
